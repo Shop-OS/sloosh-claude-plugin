@@ -20,5 +20,7 @@
         "remotion",
         "ecommerce"
     ],
-    "icon": "./assets/sloosh.png"
+    "icon": "./assets/sloosh.png",
+    "repository": "https://github.com/Shop-OS/sloosh-claude-plugin",
+    "privacyPolicyUrl": "https://sloosh.ai/privacy-policy"
 }
