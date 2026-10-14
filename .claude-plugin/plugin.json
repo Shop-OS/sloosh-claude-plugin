@@ -1,0 +1,28 @@
+{
+    "name": "sloosh",
+    "displayName": "Sloosh",
+    "version": "1.1.4",
+    "description": "Create product images, ad variants and short product videos, run published Sloosh Spaces from chat, and direct a product launch film with Remotion in a coding agent. The assistant asks for your approval before any paid work.",
+    "author": {
+        "name": "ShopOS",
+        "url": "https://sloosh.ai"
+    },
+    "homepage": "https://sloosh.ai/mcp",
+    "license": "MIT",
+    "keywords": [
+        "sloosh",
+        "product-images",
+        "ad-creative",
+        "video",
+        "image-generation",
+        "spaces",
+        "launch-video",
+        "remotion",
+        "ecommerce"
+    ],
+    "icon": "./assets/sloosh.png",
+    "documentationUrl": "https://sloosh.ai/docs/mcp",
+    "supportUrl": "https://sloosh.ai/docs/support",
+    "privacyPolicyUrl": "https://sloosh.ai/privacy-policy",
+    "termsOfServiceUrl": "https://sloosh.ai/terms-of-use"
+}
