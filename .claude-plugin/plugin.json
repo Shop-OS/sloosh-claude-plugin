@@ -20,9 +20,5 @@
         "remotion",
         "ecommerce"
     ],
-    "icon": "./assets/sloosh.png",
-    "documentationUrl": "https://sloosh.ai/docs/mcp",
-    "supportUrl": "https://sloosh.ai/docs/support",
-    "privacyPolicyUrl": "https://sloosh.ai/privacy-policy",
-    "termsOfServiceUrl": "https://sloosh.ai/terms-of-use"
+    "icon": "./assets/sloosh.png"
 }
