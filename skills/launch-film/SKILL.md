@@ -11,7 +11,7 @@ The method was proven on the Sloosh launch film (see `references/examples/`). It
 
 ## Requirements
 
-This skill runs on the user's computer. Before you start, check that you can run shell commands and that these are installed: Node.js with `npx`, `ffmpeg`, and Python 3 with numpy and Pillow. `scripts/transcribe.sh` uses `whisper-cli`; on macOS it installs whisper-cpp with Homebrew and downloads a speech model on first use. Ask the user before you install anything.
+This skill runs on the user's computer. Before you start, check that you can run shell commands and that these are installed: Node.js with `npx`, `ffmpeg`, and Python 3 with numpy and Pillow. `scripts/transcribe.sh` needs `whisper-cli` and a speech model at `${WHISPER_MODELS:-~/.cache/whisper-cpp}/ggml-small.en.bin`; it stops with setup steps when either is missing. Ask the user before you install whisper-cpp (`brew install whisper-cpp` on macOS) or download the model from https://huggingface.co/ggerganov/whisper.cpp.
 
 - If you cannot run shell commands on the user's own computer (a remote sandbox does not count), tell the user that the film needs a coding agent that runs on their computer. Offer the `product-video` skill for a single generated clip instead.
 - Remotion is free for individuals, non-profits and companies with up to three employees. Larger for-profit companies need a Remotion company license. Tell the user this once before you scaffold the project.

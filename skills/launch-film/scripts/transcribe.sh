@@ -8,16 +8,15 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 mkdir -p "$OUT"
 CLI="$(command -v whisper-cli || true)"
 if [ -z "$CLI" ]; then
-  echo "installing whisper-cpp via Homebrew…" >&2
-  HOMEBREW_NO_AUTO_UPDATE=1 brew install whisper-cpp >/dev/null
-  CLI="$(command -v whisper-cli)"
+  echo "whisper-cli not found. Install whisper.cpp first (on macOS: brew install whisper-cpp)." >&2
+  exit 2
 fi
 MDIR="${WHISPER_MODELS:-$HOME/.cache/whisper-cpp}"
-mkdir -p "$MDIR"
 MFILE="$MDIR/ggml-${MODEL}.bin"
 if [ ! -s "$MFILE" ]; then
-  echo "downloading ggml-${MODEL}.bin…" >&2
-  curl -L --fail -s -o "$MFILE" "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-${MODEL}.bin"
+  echo "Speech model $MFILE not found. Download ggml-${MODEL}.bin from" >&2
+  echo "https://huggingface.co/ggerganov/whisper.cpp into $MDIR first." >&2
+  exit 2
 fi
 BASE="$(basename "${VO%.*}" | tr ' ' '_')"
 WAV="$OUT/${BASE}_16k.wav"

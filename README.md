@@ -38,7 +38,7 @@ You can also add Sloosh as a custom connector. In Claude, open Customize, then C
 
 ## Launch films
 
-The launch film skill directs and renders a SaaS or product launch film with Remotion on your computer, cut to your voiceover. It runs in Claude Code, or wherever Claude can run commands on your computer. It needs Node.js, ffmpeg, and Python 3 with numpy and Pillow. It transcribes the voiceover with whisper-cpp, which it installs with Homebrew on macOS after it asks you. It can use Sloosh images and clips for missing shots after you approve each quote. Remotion is free for individuals, non-profits and for-profit companies with up to three employees. Larger for-profit companies need a Remotion company license.
+The launch film skill directs and renders a SaaS or product launch film with Remotion on your computer, cut to your voiceover. It runs in Claude Code, or wherever Claude can run commands on your computer. It needs Node.js, ffmpeg, and Python 3 with numpy and Pillow. It transcribes the voiceover with whisper-cpp and a speech model. Claude asks you before it installs either. It can use Sloosh images and clips for missing shots after you approve each quote. Remotion is free for individuals, non-profits and for-profit companies with up to three employees. Larger for-profit companies need a Remotion company license.
 
 ## What the plugin sends
 
