@@ -36,9 +36,55 @@ On a Team or Enterprise plan, an Owner must add the Sloosh connector for the org
 
 You can also add Sloosh as a custom connector. In Claude, open Customize, then Connectors, and add a custom connector with this URL: https://mcp.sloosh.ai/mcp. Sign in to Sloosh and authorize your workspace. You get the Sloosh tools without the six skills.
 
+## Use the skills in other agents
+
+Each skill is a folder with a SKILL.md file in the open Agent Skills format. Other coding agents can install some or all of the skills. The skills call the Sloosh tools. First connect the Sloosh server in that agent, then install the skills. In Claude Code, use the plugin. Do not also copy the skills into `~/.claude/skills`.
+
+### Connect the Sloosh server
+
+Add the Sloosh server with this URL: https://mcp.sloosh.ai/mcp. Then sign in to Sloosh and authorize your workspace.
+
+- Codex: run `codex mcp add sloosh --url https://mcp.sloosh.ai/mcp`. Codex opens the Sloosh sign-in. If it does not, run `codex mcp login sloosh`.
+- Cursor: add `{"mcpServers":{"sloosh":{"url":"https://mcp.sloosh.ai/mcp"}}}` to `~/.cursor/mcp.json`.
+- Gemini CLI: run `gemini mcp add --transport http -s user sloosh https://mcp.sloosh.ai/mcp`. Start Gemini CLI in a folder that you trust, then run `/mcp auth sloosh`.
+- Muse Code: add `"sloosh":{"transport":"streamable_http","url":"https://mcp.sloosh.ai/mcp","enabled":true,"mode":"optional"}` to the `mcp_servers` block in `~/.config/muse/settings.json`. A new file must also set `"schema_version": 1`. Then run `muse mcp login sloosh`.
+
+### Install skills with the skills CLI
+
+List the skills in this repository:
+
+```
+npx skills@1.7.2 add Shop-OS/sloosh-claude-plugin --list
+```
+
+Install the skills you want for the agents you name. With `-g`, the CLI puts one copy in `~/.agents/skills`, which Codex, Cursor and Gemini CLI all read:
+
+```
+npx skills@1.7.2 add Shop-OS/sloosh-claude-plugin --skill product-imagery product-video -a codex cursor gemini-cli -g -y
+```
+
+Always name the agents with `-a`. Without it, the CLI installs the skills into every agent it supports, Claude Code included. The skills CLI is a third-party tool. It sends this repository's name and the skill names to skills.sh. Set `DISABLE_TELEMETRY=1` to stop this.
+
+Some skills hand work to other skills. Install them together:
+
+- `product-video`, `ad-variants`, `ugc-storyboard` and `launch-film` use `product-imagery`.
+- `ugc-storyboard` and `launch-film` use `product-video`.
+- `ad-variants` and `ugc-storyboard` can use `published-spaces`.
+- `launch-film` needs its whole folder, with `scripts/`, `assets/` and `references/`. See the Launch films section below for what it needs on your computer.
+
+### Install the plugin in Codex
+
+Codex can install the whole plugin from this repository, with the six skills and the Sloosh server:
+
+```
+codex plugin marketplace add Shop-OS/sloosh-claude-plugin
+codex plugin add sloosh@sloosh
+codex mcp login sloosh
+```
+
 ## Launch films
 
-The launch film skill directs and renders a SaaS or product launch film with Remotion on your computer, cut to your voiceover. It runs in Claude Code, or wherever Claude can run commands on your computer. It needs Node.js, ffmpeg, and Python 3 with numpy and Pillow. It transcribes the voiceover with whisper-cpp and a speech model. Claude asks you before it installs either. It can use Sloosh images and clips for missing shots after you approve each quote. Remotion is free for individuals, non-profits and for-profit companies with up to three employees. Larger for-profit companies need a Remotion company license.
+The launch film skill directs and renders a SaaS or product launch film with Remotion on your computer, cut to your voiceover. It runs in a coding agent that can run commands on your computer, such as Claude Code. It needs Node.js, ffmpeg, and Python 3 with numpy and Pillow. It transcribes the voiceover with whisper-cpp and a speech model. The agent asks you before it installs either. It can use Sloosh images and clips for missing shots after you approve each quote. Remotion is free for individuals, non-profits and for-profit companies with up to three employees. Larger for-profit companies need a Remotion company license.
 
 ## What the plugin sends
 
