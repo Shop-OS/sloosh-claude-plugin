@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: trigger-start
+description: A launch set for hero products loads start.
+tags: [trigger]
+runs: 2

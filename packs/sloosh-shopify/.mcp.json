@@ -1,0 +1,8 @@
+{
+    "mcpServers": {
+        "sloosh": {
+            "type": "http",
+            "url": "https://mcp.sloosh.ai/mcp"
+        }
+    }
+}

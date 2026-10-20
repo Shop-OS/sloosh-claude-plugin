@@ -1,0 +1,26 @@
+{
+    "name": "sloosh-shopify",
+    "displayName": "Sloosh for Shopify stores",
+    "version": "0.1.0",
+    "description": "Turn a Shopify store's products into on-brand catalog images, launch ads with copy and short product page videos with Sloosh. Saves a brand kit once and reuses it. Reads products only and never changes the store. The assistant asks for your approval before any paid work.",
+    "author": {
+        "name": "ShopOS",
+        "url": "https://sloosh.ai"
+    },
+    "homepage": "https://sloosh.ai/mcp",
+    "license": "MIT",
+    "keywords": [
+        "sloosh",
+        "shopify",
+        "ecommerce",
+        "product-images",
+        "catalog",
+        "ad-creative",
+        "product-video",
+        "brand-kit"
+    ],
+    "icon": "./assets/sloosh.png",
+    "repository": "https://github.com/Shop-OS/sloosh-claude-plugin",
+    "privacyPolicyUrl": "https://sloosh.ai/privacy-policy",
+    "dependencies": ["sloosh"]
+}

@@ -1,6 +1,6 @@
 ---
 name: ad-variants
-description: Make sets of product ad images with Sloosh in feed and story sizes, such as several angles or hooks for one offer. Use when the user wants ad creative, ad variants or the same ad in several aspect ratios and the Sloosh tools are connected.
+description: Make sets of product ad images with Sloosh in feed and story sizes, such as several angles or hooks for one offer. Use when the user wants ad creative, ad variants or the same ad in several aspect ratios and the Sloosh tools are connected. For a full product launch with ad copy for each placement, use the sloosh-shopify launch-ads skill if it is installed.
 ---
 
 # Ad variants

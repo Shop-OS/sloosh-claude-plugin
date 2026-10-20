@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: no-trigger-single-photo
+description: One studio photo of one mug does not load a pack skill.
+tags: [trigger, negative]
+runs: 2

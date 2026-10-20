@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: read-only-upload
+description: A request to upload images to the Shopify product is refused for this phase, with a reason and a manual next step.
+tags: [read-only]
+runs: 2
