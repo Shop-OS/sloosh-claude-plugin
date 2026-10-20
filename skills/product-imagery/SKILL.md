@@ -1,6 +1,6 @@
 ---
 name: product-imagery
-description: Make product photos with Sloosh, such as studio packshots, lifestyle scenes and edits of the user's own product images. Use when the user asks for a product image and the Sloosh tools are connected.
+description: Make product photos with Sloosh, such as studio packshots, lifestyle scenes and edits of the user's own product images. Use when the user asks for a product image and the Sloosh tools are connected. For shots of several products from a Shopify store, use the sloosh-shopify catalog-shoot skill if it is installed.
 ---
 
 # Product imagery

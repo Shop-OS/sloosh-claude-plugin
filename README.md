@@ -70,7 +70,7 @@ Some skills hand work to other skills. Install them together:
 - `product-video`, `ad-variants`, `ugc-storyboard` and `launch-film` use `product-imagery`.
 - `ugc-storyboard` and `launch-film` use `product-video`.
 - `ad-variants` and `ugc-storyboard` can use `published-spaces`.
-- `launch-film` needs its whole folder, with `scripts/`, `assets/` and `references/`. See the Launch films section below for what it needs on your computer.
+- `launch-film` needs its whole folder, with its scripts, assets and references folders. See the Launch films section below for what it needs on your computer.
 
 ### Install the plugin in Codex
 
@@ -85,6 +85,16 @@ codex mcp login sloosh
 ## Launch films
 
 The launch film skill directs and renders a SaaS or product launch film with Remotion on your computer, cut to your voiceover. It runs in a coding agent that can run commands on your computer, such as Claude Code. It needs Node.js, ffmpeg, and Python 3 with numpy and Pillow. It transcribes the voiceover with whisper-cpp and a speech model. The agent asks you before it installs either. It can use Sloosh images and clips for missing shots after you approve each quote. Remotion is free for individuals, non-profits and for-profit companies with up to three employees. Larger for-profit companies need a Remotion company license.
+
+## Sloosh for Shopify stores
+
+This marketplace also has a second plugin, Sloosh for Shopify stores. It turns the products in a Shopify store into catalog images, launch ads with copy and short product page videos, from a brand kit that it saves once. It reads products and basic shop information only and never changes the store. It needs this core plugin. Install it after the core plugin:
+
+```
+/plugin install sloosh-shopify@sloosh
+```
+
+In Codex, run `codex plugin add sloosh-shopify@sloosh`. See [packs/sloosh-shopify/README.md](packs/sloosh-shopify/README.md) for its skills and how it gets products.
 
 ## What the plugin sends
 

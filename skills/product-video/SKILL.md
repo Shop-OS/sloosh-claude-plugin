@@ -1,6 +1,6 @@
 ---
 name: product-video
-description: Make one short product video clip with Sloosh from a prompt or a product image. Use when the user asks for a product video, a clip, or to animate a product image and the Sloosh tools are connected.
+description: Make one short product video clip with Sloosh from a prompt or a product image. Use when the user asks for a product video, a clip, or to animate a product image and the Sloosh tools are connected. For product page videos for several store products, use the sloosh-shopify pdp-video skill if it is installed.
 ---
 
 # Product video

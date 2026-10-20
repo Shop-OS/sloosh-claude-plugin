@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: trigger-launch-ads
+description: Launch ads with copy for a store product loads launch-ads.
+tags: [trigger]
+runs: 2
