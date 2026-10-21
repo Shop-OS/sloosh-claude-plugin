@@ -1,0 +1,20 @@
+<!doctype html>
+<!-- kt_lyric.html: LYRIC / BEAT. Archivo condensed caps (wdth 62, wght 900) slam + Instrument Serif italic rise (the breath word),
+     JetBrains Mono index. Off-black field, red accent, accent-block drop, echo stack, per-word inversions on beats.
+     Render: python3 lib/render_html.py ui/kt_lyric.html --dur <LEN> --out frames/kt_lyric --jobs 1 -->
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="/lib/kt.css">
+<style>
+@font-face{font-family:'Archivo';src:url('/fonts/archivo-latin-wdth-normal.woff2') format('woff2');font-style:normal;font-weight:100 900;font-stretch:62% 125%;font-display:block}
+@font-face{font-family:'Instrument Serif';src:url('/fonts/instrument-serif-latin-400-italic.woff2') format('woff2');font-style:italic;font-weight:400;font-display:block}
+@font-face{font-family:'JetBrains Mono';src:url('/fonts/jetbrains-mono-latin-wght-normal.woff2') format('woff2');font-weight:100 800;font-display:block}
+.d{font-family:'Archivo';font-weight:900;font-variation-settings:"wght" 900,"wdth" 62;text-transform:uppercase;letter-spacing:-.005em}
+.it,.serif{font-family:'Instrument Serif';font-style:italic;font-weight:400;letter-spacing:-.02em;text-transform:none}
+.lyr .w.serif{color:var(--ink)}
+.lyr .w.serif.acc{color:var(--acc)}
+.s,.m{font-family:'JetBrains Mono';font-weight:500}
+</style></head><body><div id="stage"></div>
+<script src="/lib/kit.js"></script><script src="/lib/ktkit.js"></script>
+<script>
+KT.boot({ fonts: ['900 100px Archivo', 'italic 400 100px "Instrument Serif"', '500 100px "JetBrains Mono"'], axes: { wdth: [62, 125] } });
+</script></body></html>

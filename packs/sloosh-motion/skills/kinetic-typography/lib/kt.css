@@ -1,0 +1,53 @@
+/* kt.css: base styles for every kinetic-typography page (ui/kt_*.html). The page adds its @font-face rules and the
+   theme classes .d (display face), .s (support face), .m (mono), .it (serif italic accent face).
+   Colours come from tl.FIELDS through the CSS vars --bg --ink --acc that window.render(t) sets on #stage. */
+html,body{margin:0;background:transparent;overflow:hidden}
+#stage{position:absolute;left:0;top:0;overflow:hidden;--bg:#000;--ink:#fff;--acc:#F6C945;-webkit-font-smoothing:antialiased}
+.kt-sc{position:absolute;left:0;top:0;width:100%;height:100%}
+.kt-block{position:absolute;display:flex;flex-direction:column;align-items:center;isolation:isolate}
+.kt-line{display:block;white-space:nowrap;line-height:.86}
+.kt-in{display:inline-block;will-change:transform}
+.w,.ch,.wm,.wi{display:inline-block}
+.acc{color:var(--acc)}
+.ol{color:transparent;-webkit-text-stroke:calc(var(--u)*3px) var(--ink)}
+.acc.ol{-webkit-text-stroke-color:var(--acc)}
+.w.inv{background:var(--ink);color:var(--bg)!important;-webkit-text-stroke:0;box-shadow:0 0 0 .07em var(--ink)}
+.kick{text-transform:uppercase;letter-spacing:.3em;padding-left:.3em;line-height:1.1}
+/* flap board */
+.board{line-height:1.08}
+.tile{display:inline-block;position:relative;overflow:hidden;width:.8em;height:1.08em;margin:0 .035em;text-align:center;vertical-align:top;
+  background:var(--ink);color:var(--bg);border-radius:.07em}
+.tile .fa,.tile .fb{position:absolute;left:0;right:0;top:0;height:1.08em;line-height:1.08em}
+.tile::after{content:'';position:absolute;left:0;right:0;top:50%;height:calc(var(--u)*3px);background:var(--bg);opacity:.45}
+.tile.blank{background:transparent}.tile.blank::after{display:none}
+/* odometer */
+.num{line-height:1;font-variant-numeric:tabular-nums lining-nums}
+.num .col{display:inline-block;overflow:hidden;height:1em;vertical-align:top}
+.num .strip{display:block}.num .dg{display:block;height:1em;line-height:1em}
+.num .st{display:inline-block;line-height:1em;vertical-align:top}
+/* scroll list */
+.kt-list{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:flex-start}
+.row{line-height:1.04}
+.kt-bar{background:var(--acc)}
+/* grid */
+.kt-cell{position:absolute;display:flex;align-items:center;justify-content:center;box-sizing:border-box}
+.kt-cell.inv{background:var(--ink)}
+.kt-cell.inv .kt-line{color:var(--bg);-webkit-text-stroke:0}
+/* ticker */
+.kt-ticker{position:absolute;left:0;width:100%;border-top:calc(var(--u)*6px) solid currentColor;padding-top:calc(var(--u)*20px)}
+/* zoom */
+.kt-plate{position:absolute;left:0;top:0;width:100%;height:100%}
+/* lyric */
+.lyr{line-height:.95}
+.lyr .w{transform-origin:50% 70%}
+/* lockup A (director kit) */
+.lockA{position:absolute}.lockA .l{display:table;white-space:nowrap;line-height:.86;will-change:transform}
+/* editorial */
+.ed{line-height:1.0}
+.kt-strike{position:absolute;background:var(--acc);transform-origin:0 50%;transform:scaleX(0)}
+.kt-marker{position:absolute;background:var(--mark,var(--acc));z-index:-1;transform-origin:0 50%;transform:scaleX(0)}
+.kt-swap{display:grid;justify-items:center}.kt-swap>*{grid-area:1/1}
+/* end card */
+.kt-rule{position:absolute;top:0;height:100%;background:var(--rule,var(--acc))}
+/* over footage (caption layer / plates): a soft dark shadow keeps type readable */
+.over-footage .w,.over-footage .l,.over-footage .kick{text-shadow:0 0 calc(var(--u)*18px) rgba(0,0,0,.6),0 calc(var(--u)*4px) calc(var(--u)*18px) rgba(0,0,0,.6)}

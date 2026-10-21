@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <!-- REPLACE with the brand's real logo, vectorised. This placeholder mark: a rounded tile with a spark. -->
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFB547"/><stop offset="1" stop-color="#FF6A3D"/></linearGradient></defs>
+  <rect x="4" y="4" width="112" height="112" rx="30" fill="url(#g)"/>
+  <path d="M60 22 C63 46 74 57 98 60 C74 63 63 74 60 98 C57 74 46 63 22 60 C46 57 57 46 60 22Z" fill="#fff"/>
+</svg>

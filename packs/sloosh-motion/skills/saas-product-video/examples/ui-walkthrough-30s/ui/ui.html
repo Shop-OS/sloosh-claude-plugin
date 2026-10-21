@@ -1,0 +1,283 @@
+<!doctype html>
+<!-- ui/ui.html (saas-product-video): the UI walkthrough (natural 11.2 s = tl.UI_NAT), opaque, rendered at 2x for push-ins:
+       python3 lib/render_html.py ui/ui.html --dur 11.2 --scale 2 --jobs 1 --out frames/ui
+     Always a 1920x1080 design (for a 9:16 film, render with --w 1920 --h 1080 and reframe in edit.py, see SKILL.md, "9:16 reframe").
+     The product UI is REBUILT here from the user's screenshots (SKILL.md, UI pages): REPLACE the CONFIG block and the window
+     markup with the real screens, tokens and labels. Never invent a feature. Click/pop/sparkle times come from
+     tl.json UI_CUES, so audio.py puts every SFX on its frame. Cursors are placed from MEASURED element boxes,
+     after the camera transform of that frame is applied.
+     Scenes (UI time):
+       S1 0.00-1.30  window springs in from a 3D tilt over wave ribbons; ring burst; content fades in with glowing edges; dive to the account chip
+       S2 1.30-2.45  macro on the account chip; click; the menu pops with overshoot; hover; click Settings
+       S3 2.45-3.60  whip to the 3D-tilted Settings window; the camera pans down the sidebar with vertical motion blur; click Integrations
+       S4 3.60-4.80  the Integrations table; zoom to the Status column; Connect squashes, sparkles, then a check and "Connected"
+       S5 4.80-5.90  whip back; huge placeholder letters wobble in; the brand chip pops; a shine bar wipes across it
+       S6 5.90-7.40  two photos fly in large, tilted and blurred, then land as thumbnails; the card grows; the camera pushes in
+       S7 7.40-8.80  typing, the newest letters in the accent gradient, blinking caret
+       S8 8.80-11.20 send click; concentric rounded-square rings; the button morphs into the logo tile; the wordmark grows out of it -->
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'Inter Tight';src:url('/fonts/inter-tight-latin-wght-normal.woff2') format('woff2');font-weight:100 900;font-display:block}
+@font-face{font-family:'Instrument Serif';src:url('/fonts/instrument-serif-latin-400-italic.woff2') format('woff2');font-style:italic;font-weight:400;font-display:block}
+:root{--bg:#FFF6F0;--surface:#FFFFFF;--side:#F7F5F2;--line:rgba(30,24,18,.09);--ink:#1F1C19;--mute:#7A736C;--ok:#1F9D55}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:'Inter Tight';color:var(--ink)}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;background:linear-gradient(160deg,#FFF8F3,#FFE6D8)}
+#rib{position:absolute;inset:0}
+#cam{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0}
+.persp{position:absolute;inset:0;perspective:2400px}
+.win{position:absolute;left:210px;top:100px;width:1500px;height:880px;border-radius:28px;background:var(--surface);overflow:hidden;
+  box-shadow:0 0 0 1px var(--line),0 60px 140px rgba(120,50,10,.22);transform-origin:50% 60%}
+.bar{height:44px;display:flex;align-items:center;gap:9px;padding:0 18px;border-bottom:1px solid var(--line);background:#FBFAF8}
+.bar i{width:12px;height:12px;border-radius:50%;background:#E2DDD7;display:block}
+.side{position:absolute;left:0;top:44px;bottom:0;width:280px;background:var(--side);border-right:1px solid var(--line);padding:26px 18px}
+.brand{display:flex;align-items:center;gap:12px;font-weight:700;font-size:22px}
+.brand img{width:36px;height:36px}
+.newp{margin-top:30px;height:48px;border-radius:14px;border:1.5px solid var(--line);background:#fff;display:flex;align-items:center;padding:0 16px;font-weight:600;font-size:18px;gap:10px}
+.nav{margin-top:22px}
+.nav div{height:46px;display:flex;align-items:center;gap:14px;padding:0 14px;border-radius:12px;font-size:18px;color:var(--mute);font-weight:500}
+.nav div b{width:20px;height:20px;border-radius:6px;background:#DDD7D0;display:block}
+#acct{position:absolute;left:14px;right:14px;bottom:18px;height:66px;border-radius:16px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 12px}
+.av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#FFB547,#FF6A3D);color:#fff;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center}
+#acct .nm{font-weight:600;font-size:17px} #acct .pl{font-size:14px;color:var(--mute)}
+#menuwrap{position:absolute;left:14px;bottom:96px;width:252px;height:236px}
+#menu{position:absolute;inset:0;border-radius:18px;background:#fff;box-shadow:0 0 0 1px var(--line),0 24px 60px rgba(60,30,10,.18);padding:10px;transform-origin:10% 100%}
+#menu div{height:52px;border-radius:12px;display:flex;align-items:center;gap:14px;padding:0 14px;font-size:18px;font-weight:500}
+#menu div b{width:20px;height:20px;border-radius:6px;background:#E4DED8;display:block}
+.main{position:absolute;left:280px;top:44px;right:0;bottom:0}
+.greet{position:absolute;left:0;right:0;top:150px;text-align:center;font-family:'Instrument Serif';font-style:italic;font-size:60px;letter-spacing:-.01em}
+#comp{position:absolute;left:200px;width:820px;top:280px;border-radius:26px;background:#fff;border:1px solid var(--line);box-shadow:0 18px 50px rgba(80,40,10,.10);padding:24px 26px 18px}
+.chips{height:40px;display:flex;gap:10px}
+#chip{position:relative;overflow:hidden;height:40px;border-radius:999px;background:#FFF1EA;border:1px solid #FFD2BF;display:flex;align-items:center;gap:8px;padding:0 16px 0 6px;font-size:16px;font-weight:600;color:#B5401A}
+#chip img{width:28px;height:28px}
+#thumbs{height:0;overflow:visible;display:flex;gap:14px}
+.slot{width:104px;height:124px;border-radius:14px;border:2px dashed #E6DED6;margin-top:12px;overflow:hidden;position:relative}
+.slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0}
+#txt{min-height:120px;margin-top:14px;position:relative}
+#ph{font-size:46px;font-weight:500;color:#B3AAA2;letter-spacing:-.02em;white-space:nowrap}
+#ph span{display:inline-block}
+#prompt{position:absolute;left:0;top:0;right:0;font-size:34px;font-weight:500;line-height:1.25;letter-spacing:-.015em}
+.row{display:flex;align-items:center;gap:12px;margin-top:10px}
+.plus{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--mute)}
+.model{margin-left:auto;height:40px;border-radius:999px;background:#F5F2EE;display:flex;align-items:center;padding:0 16px;font-size:16px;font-weight:600;color:#5A534C}
+#send{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+#send svg{width:24px;height:24px}
+.nav2{position:absolute;left:0;top:44px;bottom:0;width:300px;background:var(--side);border-right:1px solid var(--line);padding:24px 18px}
+.nav2 h3{font-size:26px;font-weight:700;margin-bottom:16px;padding-left:12px}
+.nav2 div{height:50px;display:flex;align-items:center;gap:14px;padding:0 12px;border-radius:12px;font-size:18px;font-weight:500;color:#4A443E}
+.nav2 div b{width:20px;height:20px;border-radius:6px;background:#DDD7D0;display:block}
+.pane{position:absolute;left:300px;top:44px;right:0;bottom:0;padding:48px 60px}
+.pane h2{font-size:38px;font-weight:700;letter-spacing:-.02em}
+.pane .sub{font-size:19px;color:var(--mute);margin-top:8px}
+.gf{margin-top:34px}
+.gf div{height:64px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;font-size:19px}
+.gf i{display:block;width:180px;height:14px;border-radius:7px;background:#EEE9E4}
+.th{margin-top:34px;display:grid;grid-template-columns:420px 1fr 230px;font-size:15px;font-weight:600;color:var(--mute);text-transform:uppercase;letter-spacing:.08em;padding:0 0 12px;border-bottom:1px solid var(--line)}
+.tr{display:grid;grid-template-columns:420px 1fr 230px;align-items:center;height:96px;border-bottom:1px solid var(--line)}
+.app{display:flex;align-items:center;gap:16px;font-size:21px;font-weight:600}
+.app b{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px}
+.desc{font-size:18px;color:var(--mute)}
+.st{position:relative;font-size:18px;font-weight:600;display:flex;align-items:center;gap:8px}
+.ok{color:var(--ok)}
+#btnC{position:relative;height:46px;padding:0 26px;border-radius:12px;color:#fff;font-weight:700;font-size:18px;display:flex;align-items:center}
+#done{position:absolute;left:0;top:50%;margin-top:-14px;opacity:0;white-space:nowrap}
+.spk{position:absolute;left:0;top:0;width:22px;height:22px;margin:-11px 0 0 -11px}
+#fly img{position:absolute;left:0;top:0;border-radius:18px;object-fit:cover;box-shadow:0 30px 60px rgba(60,20,0,.3);transform-origin:0 0}
+.ring{position:absolute;left:0;top:0;border-radius:30%;border:3px solid;opacity:0}
+#tile{position:absolute;left:0;top:0;opacity:0;border-radius:30%;background:radial-gradient(120% 90% at 30% 15%,#3A3633,#0E0D0C 60%);display:flex;align-items:center;justify-content:center}
+#tile img{width:62%;height:62%}
+#wm{position:absolute;left:0;top:0;font-weight:800;letter-spacing:-.03em;white-space:nowrap;color:var(--ink);opacity:0}
+#cur{position:absolute;left:0;top:0;transform-origin:0 0;filter:drop-shadow(0 6px 8px rgba(0,0,0,.3));z-index:10}
+</style></head><body>
+<div id="stage">
+  <svg id="rib" viewBox="0 0 1920 1080" preserveAspectRatio="none"></svg>
+  <div id="cam">
+    <div class="persp"><div class="win" id="win">
+      <div class="bar"><i></i><i></i><i></i></div>
+      <div class="side">
+        <div class="brand"><img src="/ui/logo.svg"><span id="bname"></span></div>
+        <div class="newp"><span style="font-size:22px">+</span> New project</div>
+        <div class="nav"><div><b></b>Projects</div><div><b></b>Brand kits</div><div><b></b>Templates</div><div><b></b>Library</div></div>
+        <div id="menuwrap"><div id="menu"><div id="mSet"><b></b>Settings</div><div><b></b>Brand kits</div><div><b></b>Help</div><div><b></b>Log out</div></div></div>
+        <div id="acct"><div class="av" id="avi"></div><div><div class="nm" id="uname"></div><div class="pl">Pro plan</div></div></div>
+      </div>
+      <div class="main">
+        <div class="greet" id="greet"></div>
+        <div id="comp">
+          <div class="chips"><div id="chip"><img src="/ui/logo.svg"><span id="chipT"></span></div></div>
+          <div id="thumbs"><div class="slot" id="slot1"><img src="/plates/ref1.jpg"></div><div class="slot" id="slot2"><img src="/plates/ref2.jpg"></div></div>
+          <div id="txt"><div id="ph"></div><div id="prompt"></div></div>
+          <div class="row"><div class="plus">+</div><div class="model" id="model"></div>
+            <div id="send"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        </div>
+      </div>
+    </div></div>
+    <div class="persp"><div class="win" id="win2">
+      <div class="bar"><i></i><i></i><i></i></div>
+      <div class="nav2" id="nav2"><h3>Settings</h3></div>
+      <div class="pane">
+        <div id="gen"><h2>General</h2><div class="sub">Workspace name, language and defaults</div>
+          <div class="gf"><div>Workspace<i></i></div><div>Language<i></i></div><div>Default format<i></i></div><div>Time zone<i></i></div></div></div>
+        <div id="intg"><h2>Integrations</h2><div class="sub">Connect the tools your team already uses</div>
+          <div class="th"><div>App</div><div>What it does</div><div>Status</div></div><div id="rows"></div></div>
+      </div>
+    </div></div>
+  </div>
+  <div id="fly"><img id="f1" src="/plates/ref1.jpg"><img id="f2" src="/plates/ref2.jpg"></div>
+  <div id="rings"></div>
+  <div id="tile"><img src="/ui/logo.svg"></div><div id="wm"></div>
+  <svg id="cur" viewBox="0 0 24 24"><path d="M3 2l7.5 19 2.4-7.6L20.5 11z" fill="#fff" stroke="#1F1C19" stroke-width="1.3" stroke-linejoin="round"/></svg>
+</div>
+<script src="/lib/kit.js"></script>
+<script>
+(async () => {
+  const TL = await loadTL(); const A = TL.ACCENT, A2 = TL.ACCENT2, FPS = TL.FPS || 24, CU = TL.UI_CUES;
+  // ---------------- CONFIG (REPLACE from the user's real screenshots; never invent a feature) ----------------
+  const CONFIG = {
+    product: TL.COPY.end[0], user: 'Alex Example', initials: 'AE', greeting: 'Good evening, Alex',
+    chip: 'Brand kit · Example', model: 'Studio · Fast', placeholder: 'Describe your idea', prompt: TL.COPY.prompt,
+    nav: ['General', 'Account', 'Profile', 'Billing', 'Plans', 'Members', 'Brand kits', 'Notifications', 'Security', 'Integrations', 'API keys', 'Exports', 'Language'],
+    navTarget: 9,
+    rows: [['Cloud Drive', 'Pull brand assets and fonts', 'ok', '#4C7BF4', 'D'], ['Team Chat', 'Share drafts with the team', 'ok', '#7A4CF4', 'T'],
+           ['Shop Catalog', 'Sync product photos and prices', 'connect', '#1F9D55', 'S']],
+  };
+  const $ = s => document.querySelector(s), W = 1920, H = 1080;
+  $('#bname').textContent = CONFIG.product; $('#uname').textContent = CONFIG.user; $('#avi').textContent = CONFIG.initials;
+  $('#greet').textContent = CONFIG.greeting; $('#chipT').textContent = CONFIG.chip; $('#model').textContent = CONFIG.model;
+  $('#send').style.background = `linear-gradient(135deg,${A2},${A})`;
+  $('#ph').innerHTML = [...CONFIG.placeholder].map(c => `<span>${c === ' ' ? '&nbsp;' : c}</span>`).join('');
+  CONFIG.nav.forEach((n, i) => { const d = document.createElement('div'); d.id = 'n' + i; d.innerHTML = `<b></b>${n}`; $('#nav2').appendChild(d); });
+  CONFIG.rows.forEach(([nm, ds, st, col, mono], i) => { const r = document.createElement('div'); r.className = 'tr';
+    r.innerHTML = `<div class="app"><b style="background:${col}">${mono}</b>${nm}</div><div class="desc">${ds}</div>` +
+      (st === 'ok' ? `<div class="st ok">&#10003; Connected</div>` : `<div class="st" id="st2"><div id="btnC" style="background:linear-gradient(135deg,${A2},${A})">Connect</div><div id="done" class="ok">&#10003; Connected</div></div>`);
+    $('#rows').appendChild(r); });
+  for (let k = 0; k < 10; k++) { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('class', 'spk');
+    s.innerHTML = `<path d="M12 0C13 8 16 11 24 12C16 13 13 16 12 24C11 16 8 13 0 12C8 11 11 8 12 0Z" fill="${k % 2 ? A2 : A}"/>`; $('#st2').appendChild(s); }
+  for (let k = 0; k < 4; k++) { const r = document.createElement('div'); r.className = 'ring'; r.style.borderColor = k % 2 ? A2 : A; $('#rings').appendChild(r); }
+  $('#wm').textContent = CONFIG.product;
+  // ribbons: three soft wave bands in brand tints, redrawn from t
+  const rib = $('#rib'); rib.innerHTML = [A2, A, '#F3D9FF'].map((c, i) => `<path id="rb${i}" fill="${c}" opacity="${[.30, .22, .5][i]}"/>`).join('');
+  const ribbons = t => [0, 1, 2].forEach(i => { let d = `M0 ${1080}`; for (let x = 0; x <= 1920; x += 60) { const y = 700 - i * 120 + 70 * Math.sin(x / 300 + t * 1.3 + i * 1.7) + 40 * Math.sin(x / 130 - t * 0.9 + i); d += ` L${x} ${y.toFixed(1)}`; } $('#rb' + i).setAttribute('d', d + ' L1920 1080 Z'); });
+  await Promise.all([...document.images].map(i => i.decode().catch(() => {})));
+  await document.fonts.load('500 40px "Inter Tight"'); await document.fonts.load('italic 400 60px "Instrument Serif"');
+
+  // ---------------- camera: a state is {px,py,s,ax,ay}: the point (px,py) of the layout is shown at (ax,ay), scaled s ----------------
+  const ID = { px: W / 2, py: H / 2, s: 1, ax: W / 2, ay: H / 2 };
+  const cam = $('#cam'), setCam = c => { cam.style.transform = `translate(${c.ax - c.s * c.px}px,${c.ay - c.s * c.py}px) scale(${c.s})`; };
+  const focus = (sel, s, ax, ay) => { const c = K.center(sel); return { px: c.x, py: c.y, s, ax: ax * W, ay: ay * H }; };   // measured with the camera at identity
+  const mixC = (a, b, u) => ({ px: K.lerp(a.px, b.px, u), py: K.lerp(a.py, b.py, u), s: Math.exp(K.lerp(Math.log(a.s), Math.log(b.s), u)), ax: K.lerp(a.ax, b.ax, u), ay: K.lerp(a.ay, b.ay, u) });
+  const path = (t, keys) => { let c = keys[0][1]; for (let i = 1; i < keys.length; i++) { const [ta, a] = keys[i - 1], [tb, b, ez] = keys[i]; if (t >= ta) c = mixC(a, b, (ez || K.E.inOut)(K.seg(t, ta, tb))); } return c; };
+  const cur = $('#cur'), CK = CU.click;
+  const click = (t, tc) => 1 - 0.18 * Math.exp(-Math.pow((t - tc) / 0.06, 2));     // the cursor squash around a click
+  const press = (t, tc, d = 0.1) => 1 - d * Math.exp(-Math.pow((t - tc) / 0.07, 2)); // the clicked element squashes too
+
+  window.render = t => {
+    ribbons(t);
+    const S = t < 1.3 ? 1 : t < 2.45 ? 2 : t < 3.6 ? 3 : t < 4.8 ? 4 : t < 5.9 ? 5 : t < 7.4 ? 6 : t < 8.8 ? 7 : 8;
+    const home = !(S === 3 || S === 4); $('#win').parentNode.style.display = home ? '' : 'none'; $('#win2').parentNode.style.display = home ? 'none' : '';
+    // ---- window tilt (S1 spring entrance from a 3D tilt; S3/S4 tilted settings window)
+    if (home) {
+      const sp = K.E.spring(K.seg(t, 0, 1.0), 0.6, 11), settle = K.E.inOut(K.seg(t, 0.9, 1.3));
+      K.set('#win', { rx: K.lerp(28, 6, sp) * (1 - settle) + 2 * settle, ry: K.lerp(-26, -9, sp) * (1 - settle) - 3 * settle, y: (1 - sp) * 320, s: K.lerp(0.8, 1, sp),
+        o: S === 8 ? 1 - K.E.inOut(K.seg(t, 9.3, 9.8)) : 1 });
+      $('#win').style.boxShadow = `0 0 0 1px rgba(30,24,18,.09),0 60px 140px rgba(120,50,10,.22),0 0 ${80 * (1 - K.seg(t, 0.4, 1.1))}px ${A}`;   // glowing edges as it lands
+      $('#win').querySelectorAll('.side,.main').forEach(e => e.style.opacity = 0.25 + 0.75 * K.seg(t, 0.35, 0.9));
+    } else {
+      const u = K.E.out(K.seg(t, 2.45, 3.6), 3);
+      K.set('#win2', { rx: K.lerp(11, 7, u), ry: K.lerp(-20, -13, u), s: 0.97 });
+    }
+    // ---- S1 ring burst inside the window
+    // (drawn with the rings layer below, centred on the window, 0.25-0.85)
+    // ---- S2 account menu pops with overshoot; hover highlight; click Settings
+    const mp = K.E.back(K.seg(t, CU.pop[0] - 0.02, CU.pop[0] + 0.22), 1.8);
+    K.set('#menu', { s: t < CU.pop[0] - 0.02 ? 0.001 : Math.max(0.001, mp) * press(t, CK[1], 0.04), o: t < CU.pop[0] - 0.02 || S > 2 ? 0 : K.seg(t, CU.pop[0] - 0.02, CU.pop[0] + 0.08) });
+    $('#mSet').style.background = t > 1.98 && S === 2 ? '#F4EEE8' : 'transparent';
+    K.set('#acct', { s: press(t, CK[0], 0.06) });
+    // ---- S3/S4 settings: General -> Integrations after the click; rows cascade in; Connect -> sparkle -> Connected
+    const tI = CK[2] + 0.04; $('#gen').style.display = t < tI ? '' : 'none'; $('#intg').style.display = t < tI ? 'none' : '';
+    CONFIG.nav.forEach((_, i) => $('#n' + i).style.background = (i === CONFIG.navTarget && t > tI) || (i === 0 && t <= tI) ? '#fff' : 'transparent');
+    [...document.querySelectorAll('.tr')].forEach((r, i) => { const v = K.E.out(K.seg(t, tI + 0.04 * i, tI + 0.04 * i + 0.3)); K.set(r, { o: v, y: (1 - v) * 18 }); });
+    const tc = CK[3], conn = t >= tc + 0.2;
+    K.set('#btnC', { s: press(t, tc, 0.12), o: conn ? 1 - K.seg(t, tc + 0.2, tc + 0.3) : 1 });
+    K.set('#done', { o: K.seg(t, tc + 0.22, tc + 0.34), x: (1 - K.E.out(K.seg(t, tc + 0.22, tc + 0.45))) * 16 });
+    document.querySelectorAll('.spk').forEach((s, k) => { const a = k / 10 * Math.PI * 2 + 0.3, u = K.seg(t, CU.sparkle[0], CU.sparkle[0] + 0.45), r = 30 + 120 * K.E.out(u);
+      K.set(s, { x: 80 + Math.cos(a) * r, y: 23 + Math.sin(a) * r * 0.8, s: (k % 3 ? 0.7 : 1.1) * Math.sin(Math.PI * u), r: 90 * u, o: u > 0 && u < 1 ? 1 : 0 }); });
+    // ---- S5 placeholder letters wobble in; brand chip pops; shine bar
+    const phOn = t >= 4.85 && t < 7.45;
+    $('#ph').querySelectorAll('span').forEach((s, i) => { const a = 4.85 + i * 0.022, u = K.E.spring(K.seg(t, a, a + 0.5), 0.45, 13);
+      K.set(s, { o: phOn ? K.seg(t, a, a + 0.08) * (1 - K.seg(t, 7.33, 7.45)) : 0, y: (1 - u) * -26, r: (1 - u) * 10 }); });
+    const cp = K.E.back(K.seg(t, CU.pop[1] - 0.03, CU.pop[1] + 0.25), 2.0);
+    K.set('#chip', { s: t < CU.pop[1] - 0.03 ? 0.001 : Math.max(0.001, cp), o: t < CU.pop[1] - 0.03 ? 0 : 1, origin: '0% 50%' });
+    K.shine('#chip', t, 5.45, 0.42);
+    // ---- S6 thumbnails row grows; slots fill when each photo lands; the card grows with an accent glow
+    $('#thumbs').style.height = (136 * K.E.out(K.seg(t, 5.92, 6.2))) + 'px';
+    document.querySelectorAll('.slot').forEach((s, i) => { s.style.opacity = K.seg(t, 5.95, 6.1); s.querySelector('img').style.opacity = t >= CU.pop[2 + i] ? 1 : 0;
+      s.style.borderStyle = t >= CU.pop[2 + i] ? 'solid' : 'dashed'; K.set(s, { s: t >= CU.pop[2 + i] ? 1 + 0.08 * Math.exp(-(t - CU.pop[2 + i]) / 0.08) : 1 }); });
+    const grow = K.E.out(K.seg(t, 6.8, 7.2));
+    $('#comp').style.boxShadow = `0 18px 50px rgba(80,40,10,.10),0 0 0 ${2 * grow}px ${A}55,0 0 ${50 * grow}px ${A}33`;
+    // ---- S7 typing: newest letters in the accent gradient with a glow, caret from film time
+    const [t0, cps] = CU.type, txt = CONFIG.prompt, n = Math.max(0, Math.min(txt.length, Math.floor((t - t0) * cps)));
+    let html = ''; for (let i = 0; i < n; i++) { const age = n - 1 - i; html += age < 6 && n < txt.length ? `<span style="color:${grad(age / 6)};text-shadow:0 0 14px ${A}88">${txt[i]}</span>` : txt[i]; }
+    $('#prompt').innerHTML = t >= t0 ? html + `<span style="color:${A};opacity:${(Math.floor(t * 2.4) % 2 === 0 || n < txt.length) && t < CK[4] ? 1 : 0}">|</span>` : '';
+    // ---- S8 send: the button squashes; it is hidden when the logo tile takes its place
+    K.set('#send', { s: press(t, CK[4], 0.14), o: t < CK[4] + 0.05 ? 1 : 0 });
+
+    // ---------------- camera for this frame (measure at identity, then set) ----------------
+    setCam(ID);
+    const fA = focus('#acct', 2.6, 0.40, 0.66), fM = focus('#menuwrap', 2.15, 0.42, 0.50);
+    let c = ID, mb = [0, 0], whipX = 0;
+    if (S === 1) c = path(t, [[0, ID], [1.0, ID], [1.3, fA, K.E.in]]);
+    else if (S === 2) c = path(t, [[1.3, fA], [1.72, fA], [2.02, fM], [2.45, { ...fM, s: 2.25 }]]);
+    else if (S === 3 || S === 4) {
+      const f0 = focus('#n0', 2.0, 0.36, 0.30), f9 = focus('#n' + CONFIG.navTarget, 2.0, 0.36, 0.56), fS = focus('#st2', 2.3, 0.55, 0.52);
+      const keys = [[2.45, f0], [2.62, f0], [3.02, f9], [3.6, { ...f9, s: 2.05 }], [3.98, fS], [4.8, { ...fS, s: 2.4 }]];
+      c = path(t, keys); const p = path(t - 1 / FPS, keys);                                     // vertical motion blur from the pan speed
+      mb = [0, Math.min(14, Math.abs((c.py - p.py) * c.s) * 0.3)];
+      whipX = 300 * (1 - K.E.out(K.seg(t, 2.45, 2.62))); mb[0] = 40 * (1 - K.seg(t, 2.45, 2.6));
+    } else if (S === 5) { const fP = focus('#ph', 2.15, 0.5, 0.5); c = path(t, [[4.8, fP], [5.9, { ...fP, s: 2.0 }]]);
+      whipX = -300 * (1 - K.E.out(K.seg(t, 4.8, 4.97))); mb[0] = 40 * (1 - K.seg(t, 4.8, 4.95)); }
+    else if (S === 6 || S === 7) { const fC = focus('#comp', 1.45, 0.5, 0.53); c = path(t, [[5.9, { ...fC, s: 1.6 }], [6.15, fC], [6.8, fC], [7.4, { ...fC, s: 1.7 }], [8.8, { ...fC, s: 1.78 }]]); }
+    else { const fC = focus('#comp', 1.78, 0.5, 0.53), fB = focus('#send', 1.95, 0.6, 0.58); c = path(t, [[8.8, fC], [9.05, fB], [11.2, { ...fB, s: 1.85 }]]); }
+    setCam({ ...c, ax: c.ax + whipX }); K.mblur('.persp', mb[0], mb[1]); K.mblur(document.querySelectorAll('.persp')[1], mb[0], mb[1]);
+
+    // ---------------- screen-space layers, placed from MEASURED boxes after the camera ----------------
+    // S1 ring burst centred on the window
+    const rings = document.querySelectorAll('.ring');
+    if (t < 1.0) { const wb = K.measure('#win'), cx = wb.left + wb.width / 2, cy = wb.top + wb.height / 2;
+      rings.forEach((r, k) => { const u = K.seg(t, 0.25 + k * 0.07, 0.85 + k * 0.07); Object.assign(r.style, { width: '300px', height: '300px', borderRadius: '50%' });
+        K.set(r, { x: cx - 150, y: cy - 150, s: 0.2 + 3.2 * K.E.out(u), o: u > 0 && u < 1 ? (1 - u) * 0.9 : 0 }); }); }
+    // S6 photos fly in large, tilted and blurred, and land on the measured slots
+    [['#f1', '#slot1', 5.95, CU.pop[2], -14], ['#f2', '#slot2', 6.25, CU.pop[3], 12]].forEach(([f, sl, a, b, rot]) => {
+      const e = $(f), on = t >= a && t < b; e.style.display = on ? '' : 'none'; if (!on) return;
+      const r = K.measure(sl), u = K.E.inOut(K.seg(t, a, b)), h0 = 720, w0 = h0 * 0.8, x0 = rot < 0 ? 330 : 1050, y0 = 150;
+      e.style.width = w0 + 'px'; e.style.height = h0 + 'px';
+      K.set(e, { x: K.lerp(x0, r.left, u), y: K.lerp(y0, r.top, u), s: K.lerp(1, r.height / h0, u), r: rot * (1 - u), blur: 16 * (1 - u) * (1 - u), o: K.seg(t, a, a + 0.06) });
+    });
+    // S8 rings from the send button, then the button morphs into the logo tile; the wordmark grows out of the tile
+    if (t >= CK[4]) {
+      const sb = K.measure('#send'), cx = sb.left + sb.width / 2, cy = sb.top + sb.height / 2;
+      rings.forEach((r, k) => { const u = K.seg(t, CK[4] + 0.02 + k * 0.09, CK[4] + 0.72 + k * 0.09); Object.assign(r.style, { width: sb.width + 'px', height: sb.height + 'px', borderRadius: '30%' });
+        K.set(r, { x: cx - sb.width / 2, y: cy - sb.height / 2, s: 1 + 3.6 * K.E.out(u), o: u > 0 && u < 1 ? (1 - u) * 0.95 : 0, origin: '50% 50%' }); });
+      const m = K.E.out(K.seg(t, CK[4] + 0.05, CU.pop[4] - 0.02), 3), sz = K.lerp(sb.width, 190, m), wmOut = K.E.inOut(K.seg(t, CU.sparkle[1], CU.sparkle[1] + 0.6));
+      const wm = $('#wm'); wm.style.fontSize = '112px'; const ww = K.measure(wm).width, gap = 34, total = 190 + gap + ww;
+      const ty = K.lerp(cy, H / 2, m);
+      const tileX = K.lerp(cx, W / 2, m) - (total / 2 - 95) * wmOut;
+      Object.assign($('#tile').style, { width: sz + 'px', height: sz + 'px', borderRadius: K.lerp(50, 30, m) + '%', border: `${K.lerp(0, 5, m)}px solid ${A}`,
+        background: m < 0.5 ? `linear-gradient(135deg,${A2},${A})` : 'radial-gradient(120% 90% at 30% 15%,#3A3633,#0E0D0C 60%)', boxShadow: `0 30px 70px rgba(0,0,0,${0.35 * m}),0 0 ${40 * m}px ${A}66` });
+      K.set('#tile', { x: tileX - sz / 2, y: ty - sz / 2, o: 1 });
+      const lp = K.E.back(K.seg(t, CU.pop[4], CU.pop[4] + 0.3), 2.2); K.set('#tile img', { s: t < CU.pop[4] ? 0.001 : Math.max(0.001, lp), r: (1 - Math.min(1, lp)) * -30 });
+      K.set(wm, { x: tileX + 95 + gap, y: H / 2 - K.measure(wm).height / 2, o: wmOut > 0 ? 1 : 0, clip: `inset(-20% ${100 - wmOut * 100}% -20% 0)` });
+    } else { $('#tile').style.opacity = 0; $('#wm').style.opacity = 0; if (t >= 1.0) rings.forEach(r => r.style.opacity = 0); }
+    // ---- the cursor: journeys between MEASURED targets, a squash on each click (size grows a little with the zoom)
+    const cs = 30 * Math.sqrt(c.s); cur.style.width = cur.style.height = cs + 'px';
+    const T9 = '#n' + CONFIG.navTarget;
+    const legs = [[1.30, 1.56, { x: W * 0.72, y: H * 1.08 }, '#acct', CK[0], 1.80], [1.80, 2.16, '#acct', '#mSet', CK[1], 2.45],
+                  [2.90, 3.24, { x: W * 0.8, y: H * 0.95 }, T9, CK[2], 3.78], [3.78, 4.08, T9, '#btnC', CK[3], 4.8], [8.84, 9.04, '#prompt', '#send', CK[4], 9.6]];
+    const leg = legs.find(l => t >= l[0] && t < l[5]);
+    if (leg) { const [a, b, from, to, tc] = leg; cur.style.display = ''; K.cursor(cur, from, to, t, a, b, tc); }
+    else cur.style.display = 'none';
+  };
+  const grad = u => { const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)); const a = p(A), b = p('#1F1C19'); return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * u)).join(',')})`; };
+  await document.fonts.ready; window.READY = true;
+})();
+</script></body></html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<!-- ui/hud.html (glitch-fx): the mono HUD layer, one 2D drawing surface redrawn from t alone (no timers):
+       python3 lib/render_html.py ui/hud.html --dur <HUD.frame end> --jobs 1 --out frames/hud
+     FRAME (tl.HUD.frame): safe-zone corner brackets, REC dot + timecode top-left, frame counter top-right.
+     TRACK (tl.HUD.track windows): blob-tracking boxes locked to real features of the plate ([cx, cy, w, h] fractions),
+       re-picked every 2 frames (seeded), coordinate labels, dashed links, one ALERT box in five, a crosshair on box 0.
+     Only coordinates, timecodes and frame counters: never fake words ("SYSTEM HACK 99%"). Coordinates are texture
+     (20 px); everything meant to be read is >= 28 px and inside the safe zone. -->
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'Film Mono';src:url('/fonts/jetbrains-mono-latin-500-normal.woff2') format('woff2');font-weight:500;font-display:block}
+html,body{margin:0;background:transparent;overflow:hidden}
+canvas{position:absolute;left:0;top:0}
+</style></head><body><canvas id="c"></canvas>
+<script src="/lib/kit.js"></script>
+<script>
+(async () => {
+  const TL = await loadTL(), W = TL.W, H = TL.H, u = Math.min(W, H) / 1080, FPS = TL.FPS, HUD = TL.HUD;
+  await document.fonts.load('500 28px "Film Mono"');
+  const cv = document.getElementById('c'); cv.width = W; cv.height = H; const g = cv.getContext('2d');
+  // frame shape from the aspect: tall (9:16, phone UI over the bottom third), portrait (4:5), square, landscape (16:9)
+  const ar = W / H, shape = ar < 0.7 ? 'tall' : ar < 0.85 ? 'portrait' : ar > 1.2 ? 'landscape' : 'square';
+  const SZ = { tall: { l: 120 * u, r: W - 120 * u, top: 240 * u, bot: H - 660 * u }, portrait: { l: W * .08, r: W * .92, top: H * .07, bot: H * .9 },
+               square: { l: W * .07, r: W * .93, top: H * .07, bot: H * .91 }, landscape: { l: W * .054, r: W * .946, top: H * .08, bot: H * .91 } }[shape];
+  const hash = (a, b) => { let h = Math.imul(a | 0, 374761393) + Math.imul(b | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+  const pad = (n, k = 2) => String(n).padStart(k, '0');
+  const corner = (x, y, sx, sy, L) => { g.beginPath(); g.moveTo(x, y + sy * L); g.lineTo(x, y); g.lineTo(x + sx * L, y); g.stroke(); };
+
+  window.render = t => {
+    g.clearRect(0, 0, W, H); const f = Math.round(t * FPS);
+    const [fa, fb] = HUD.frame;
+    if (t >= fa && t < fb) {
+      g.strokeStyle = TL.INK; g.globalAlpha = 0.7; g.lineWidth = 3 * u; const L = 54 * u, m = 18 * u;
+      corner(SZ.l - m, SZ.top - m, 1, 1, L); corner(SZ.r + m, SZ.top - m, -1, 1, L); corner(SZ.l - m, SZ.bot + m, 1, -1, L); corner(SZ.r + m, SZ.bot + m, -1, -1, L);
+      g.globalAlpha = 1; g.font = `500 ${28 * u}px "Film Mono"`; g.textBaseline = 'top'; g.fillStyle = TL.INK;
+      const s = Math.floor(t), fr = f % FPS, tc = `REC 00:00:${pad(s)}:${pad(fr)}`;
+      if (Math.floor(t * 2) % 2 === 0) { g.fillStyle = TL.ALERT; g.beginPath(); g.arc(SZ.l + 11 * u, SZ.top + 40 * u + 15 * u, 10 * u, 0, 7); g.fill(); }
+      g.fillStyle = TL.INK; g.fillText(tc, SZ.l + 32 * u, SZ.top + 40 * u);
+      const fc = `F ${pad(f, 4)}`; g.fillText(fc, SZ.r - g.measureText(fc).width, SZ.top + 40 * u);
+    }
+    for (const w of HUD.track) {
+      const [a, b] = w.t; if (t < a || t >= b) continue;
+      const step = Math.floor(f / 2), k = Math.min(1, (t - a) / 0.25);          // boxes lock on over 0.25 s
+      g.lineWidth = 2 * u; g.font = `500 ${20 * u}px "Film Mono"`; g.textBaseline = 'bottom';
+      const pts = [];
+      w.boxes.forEach((bx, i) => {
+        if (hash(step * 13 + i, 21) > 0.8 && i > 0) return;                       // ~80% present, re-picked every 2 frames
+        const j = 6 * u, cx = bx[0] * W + (hash(step, i * 7 + 1) - .5) * 2 * j, cy = bx[1] * H + (hash(step, i * 7 + 2) - .5) * 2 * j;
+        const bw = bx[2] * W * (0.9 + 0.2 * hash(step, i * 7 + 3)) * (1.6 - 0.6 * k), bh = bx[3] * H * (0.9 + 0.2 * hash(step, i * 7 + 4)) * (1.6 - 0.6 * k);
+        const alert = i % 5 === 4; g.strokeStyle = alert ? TL.ALERT : TL.INK; g.globalAlpha = (alert ? 0.95 : 0.8) * k;
+        g.strokeRect(Math.round(cx - bw / 2) + .5, Math.round(cy - bh / 2) + .5, Math.round(bw), Math.round(bh));
+        g.fillStyle = TL.INK; g.globalAlpha = 0.9 * k; g.fillText(`x ${Math.round(cx)} y ${Math.round(cy)}`, cx - bw / 2, cy - bh / 2 - 6 * u);
+        if (i === 0) { g.globalAlpha = 0.6 * k; g.beginPath(); g.moveTo(cx - 22 * u, cy); g.lineTo(cx + 22 * u, cy); g.moveTo(cx, cy - 22 * u); g.lineTo(cx, cy + 22 * u); g.stroke(); }
+        pts.push([cx, cy]);
+      });
+      g.strokeStyle = TL.INK; g.globalAlpha = 0.35 * k; g.setLineDash([6 * u, 8 * u]); g.beginPath();
+      pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.stroke(); g.setLineDash([]); g.globalAlpha = 1;
+    }
+  };
+  window.READY = true;
+})();
+</script></body></html>

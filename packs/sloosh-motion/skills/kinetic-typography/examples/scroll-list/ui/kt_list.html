@@ -1,0 +1,17 @@
+<!doctype html>
+<!-- kt_list.html: SCROLL LIST. Inter Tight 800 lowercase rows through a fixed band at 47% height, one cobalt bar, JetBrains Mono
+     kicker and ticker. Render: python3 lib/render_html.py ui/kt_list.html --dur <LEN> --out frames/kt_list --jobs 1 -->
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="/lib/kt.css">
+<style>
+@font-face{font-family:'Inter Tight';src:url('/fonts/inter-tight-latin-wght-normal.woff2') format('woff2');font-weight:100 900;font-display:block}
+@font-face{font-family:'JetBrains Mono';src:url('/fonts/jetbrains-mono-latin-wght-normal.woff2') format('woff2');font-weight:100 800;font-display:block}
+.d{font-family:'Inter Tight';font-weight:800;letter-spacing:-.05em}
+.s,.m{font-family:'JetBrains Mono';font-weight:500}
+.s.kick{letter-spacing:.14em;padding-left:.14em}
+.kt-line.tick{font-family:'JetBrains Mono';font-weight:600;letter-spacing:0;text-transform:uppercase}
+</style></head><body><div id="stage"></div>
+<script src="/lib/kit.js"></script><script src="/lib/ktkit.js"></script>
+<script>
+KT.boot({ fonts: ['800 100px "Inter Tight"', '500 100px "JetBrains Mono"', '600 100px "JetBrains Mono"'] });
+</script></body></html>

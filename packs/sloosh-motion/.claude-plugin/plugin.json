@@ -1,0 +1,26 @@
+{
+    "name": "sloosh-motion",
+    "displayName": "Sloosh motion films",
+    "version": "0.1.0",
+    "description": "Direct and render short stylised motion films on your own computer: product reveals, beat-synced hype edits, software walkthroughs and feature announcements, kinetic typography, glitch, dot-matrix and morph films. Sloosh makes the missing stills and clips, and the assistant asks for your approval before any paid work. Needs a coding agent that runs local commands.",
+    "author": {
+        "name": "ShopOS",
+        "url": "https://sloosh.ai"
+    },
+    "homepage": "https://sloosh.ai/mcp",
+    "license": "MIT",
+    "keywords": [
+        "sloosh",
+        "motion-graphics",
+        "video-editing",
+        "product-video",
+        "kinetic-typography",
+        "product-reveal",
+        "launch-video",
+        "ffmpeg"
+    ],
+    "icon": "./assets/sloosh.png",
+    "repository": "https://github.com/Shop-OS/sloosh-claude-plugin",
+    "privacyPolicyUrl": "https://sloosh.ai/privacy-policy",
+    "dependencies": ["sloosh"]
+}

@@ -1,0 +1,62 @@
+<!doctype html>
+<!-- ui/type.html (dot-matrix-particles): the crisp type layer, rendered to a transparent PNG sequence:
+       python3 lib/render_html.py ui/type.html --dur <LEN> --jobs 1 --out frames/type
+     WORD: Archivo upright, width 125, weight 900, UPPERCASE, HOT colour, centred at 47% height. It only FADES in (no
+       move): edit.py samples this layer's frame to aim the particles, so they land exactly on these glyphs.
+     LABEL: JetBrains Mono 500, caps, +0.16em, with a 2 px ink rule growing under the first line (point-cloud HUD).
+     TAG: JetBrains Mono 500, +0.28em, INK colour, letters fade in one by one under the wordmark.
+     The LED board lockup is NOT here: it is built in Python (dotskit.LEDText) so it shares the dot grid.
+     Fonts load before measuring; every line auto-fits the safe zone. Copy and cues come from tl.json. -->
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'Archivo';src:url('/fonts/archivo-latin-wdth-normal.woff2') format('woff2');font-style:normal;font-weight:100 900;font-stretch:62% 125%;font-display:block}
+@font-face{font-family:'JetBrains Mono';src:url('/fonts/jetbrains-mono-latin-500-normal.woff2') format('woff2');font-weight:500;font-display:block}
+html,body{margin:0;background:transparent;overflow:hidden}
+#stage{position:absolute;left:0;top:0;overflow:hidden}
+.wide{font-family:'Archivo';font-weight:900;font-stretch:125%;text-transform:uppercase;line-height:.9;letter-spacing:-.01em;white-space:nowrap}
+.mono{font-family:'JetBrains Mono';font-weight:500;text-transform:uppercase;white-space:nowrap}
+.blk{position:absolute}
+.mask{overflow:hidden;display:block;padding:0 0 .12em}
+.mask>span{display:inline-block}
+.ch{display:inline-block}
+.rule{position:absolute;height:calc(var(--u)*2px);transform-origin:left center}
+</style></head><body><div id="stage"></div>
+<script src="/lib/kit.js"></script>
+<script>
+(async () => {
+  const TL = await loadTL(), W = TL.W, H = TL.H, u = Math.min(W, H) / 1080, C = TL.COPY, T = TL.TYPE, P = TL.PAL;
+  await Promise.all(['900 100px Archivo', '500 30px "JetBrains Mono"'].map(f => document.fonts.load(f)));
+  const st = document.getElementById('stage'); st.style.width = W + 'px'; st.style.height = H + 'px'; st.style.setProperty('--u', u);
+  const portrait = W / H < 0.85;                                                  // 9:16 and 4:5; 1:1 and 16:9 use the wide layout
+  const SZ = portrait ? { l: 120 * u, r: W - 120 * u, top: 240 * u, bot: H - 660 * u } : { l: W * .054, r: W * .946, top: H * .08, bot: H * .91 };
+  const S = portrait ? { word: 220, label: 28, tag: 30 } : { word: 190, label: 28, tag: 28 };     // px per 1080 of the short side
+  const el = (cls, html) => { const d = document.createElement('div'); d.className = cls; d.innerHTML = html; st.appendChild(d); return d; };
+  const fit = (e, max) => { const w = K.measure(e).width; if (w > max) e.style.fontSize = (parseFloat(e.style.fontSize) * max / w) + 'px'; };
+
+  // LABELS: two lines, top band, left of the safe zone (never over the face)
+  const lab = el('blk mono', C.label.map(s => `<span class="mask"><span>${s}</span></span>`).join(''));
+  Object.assign(lab.style, { left: SZ.l + 'px', top: (SZ.top + 60 * u) + 'px', fontSize: S.label * u + 'px', letterSpacing: '.16em', color: P.HOT, lineHeight: 1.5 });
+  fit(lab, (SZ.r - SZ.l) * 0.9);
+  const rule = el('rule', ''); rule.style.background = P.INK; const l1 = K.measure(lab.querySelector('.mask'));
+  Object.assign(rule.style, { left: SZ.l + 'px', top: (l1.bottom + 4 * u) + 'px', width: Math.min(l1.width, 300 * u) + 'px' });
+  // WORD: centred at 47% height, fades in only
+  const word = el('blk wide', `<span style="font-size:${S.word * u}px;color:${P.HOT}">${C.word}</span>`);
+  fit(word.firstChild, (SZ.r - SZ.l) * 0.94); const wr = K.measure(word.firstChild);
+  Object.assign(word.style, { left: ((W - wr.width) / 2) + 'px', top: (H * 0.47 - wr.height / 2) + 'px' });
+  // TAG: under the wordmark, letters fade in one by one
+  const tag = el('blk mono', [...C.tag].map(c => `<span class="ch">${c === ' ' ? '&nbsp;' : c}</span>`).join(''));
+  Object.assign(tag.style, { fontSize: S.tag * u + 'px', letterSpacing: '.28em', color: P.INK }); fit(tag, (SZ.r - SZ.l) * 0.9);
+  const tw = K.measure(tag).width; Object.assign(tag.style, { left: ((W - tw) / 2 + 0.14 * parseFloat(tag.style.fontSize)) + 'px', top: (H * 0.47 + wr.height / 2 + 40 * u) + 'px' });
+
+  window.render = t => {
+    const [la, lb] = T.label, on = t >= la && t < lb + 0.2; lab.style.display = rule.style.display = on ? 'block' : 'none';
+    if (on) { lab.querySelectorAll('.mask>span').forEach((s, i) => { const a = la + i * 0.2; K.set(s, { y: (1 - K.E.out(K.seg(t, a, a + 0.35))) * 1.2 * S.label * u, o: t >= a ? 1 : 0 }); });
+      K.set(rule, { sx: K.E.out(K.seg(t, la + 0.05, la + 0.65)) * (1 - K.seg(t, lb, lb + 0.15)) });
+      lab.style.opacity = 1 - K.seg(t, lb, lb + 0.15); }
+    const [wa] = T.word; word.style.display = t >= wa ? 'block' : 'none'; word.style.opacity = K.E.inOut(K.seg(t, wa, wa + 0.45));
+    const [ta] = T.tag; tag.style.display = t >= ta ? 'block' : 'none';
+    if (t >= ta) tag.querySelectorAll('.ch').forEach((c, i) => { c.style.opacity = K.seg(t, ta + i * 0.035, ta + i * 0.035 + 0.25); });
+  };
+  await document.fonts.ready; window.READY = true;
+})();
+</script></body></html>

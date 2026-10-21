@@ -1,0 +1,114 @@
+<!doctype html>
+<!-- ui/type.html (morph-shapeshift): the film's type layer, rendered to a transparent PNG sequence:
+       python3 lib/render_html.py ui/type.html --dur <LEN> --out frames/type --jobs 1
+     Lockups (all measured after the fonts load, auto-fit to the safe zone, cues + copy from tl.json):
+       FORM   counter + one state word that rolls in a masked slot on each key landing (TYPE.forms; TYPE_POS bl|tl|under)
+       STACK  Lockup A, two-line stack bottom-left (TYPE.lockA_*)            ECHO  hero word + outlined copies (TYPE.echo)
+       END    traced logo (ui/logo.json, END_LOGO) + Archivo title + rules + spaced line (TYPE.end) -->
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'Archivo';src:url('/fonts/archivo-latin-wdth-italic.woff2') format('woff2');font-style:italic;font-weight:100 900;font-stretch:62% 125%;font-display:block}
+@font-face{font-family:'Inter Tight';src:url('/fonts/inter-tight-latin-wght-normal.woff2') format('woff2');font-weight:100 900;font-display:block}
+html,body{margin:0;background:transparent;overflow:hidden}
+#stage{position:absolute;left:0;top:0;overflow:hidden}
+.hype{font-family:'Archivo';font-style:italic;font-weight:900;font-stretch:125%;text-transform:uppercase;line-height:.86;letter-spacing:-.01em;white-space:nowrap}
+.shadow{text-shadow:0 0 calc(var(--u)*18px) rgba(0,0,0,.6),0 calc(var(--u)*4px) calc(var(--u)*18px) rgba(0,0,0,.6)}
+.abs{position:absolute}
+.slot{overflow:hidden;padding:0 .12em .06em 0}
+.slot>span{display:block;will-change:transform}
+.count{font-family:'Inter Tight';font-weight:700;letter-spacing:.24em;text-transform:uppercase;white-space:nowrap}
+.lockA .l{display:table}
+.echo .hero,.echo .ghost{display:block;text-align:center}
+.echo .ghost{color:transparent;-webkit-text-stroke:calc(var(--u)*3px) #fff}
+.echo .small{display:block;text-align:center;font-family:'Inter Tight';font-weight:700;font-style:normal;letter-spacing:.42em;padding-left:.42em}
+.end{left:0;right:0;text-align:center}
+.end .s{display:block;font-family:'Inter Tight';font-weight:600;letter-spacing:.32em;padding-left:.32em;text-transform:uppercase}
+.rule{position:absolute;height:calc(var(--u)*3px)}
+</style></head><body><div id="stage"></div>
+<script src="/lib/kit.js"></script><script src="/lib/morphkit.js"></script>
+<script>
+(async () => {
+  const TL = await loadTL(), W = TL.W, H = TL.H, ar = W / H, land = ar > 1.2, tall = ar < 0.7, u = Math.min(W, H) / 1080, C = TL.COPY, T = TL.TYPE;
+  await Promise.all(['italic 900 100px Archivo', '700 100px "Inter Tight"', '600 100px "Inter Tight"'].map(f => document.fonts.load(f)));
+  const st = document.getElementById('stage'); st.style.width = W + 'px'; st.style.height = H + 'px'; st.style.setProperty('--u', u);
+  // safe zone (px at the short side 1080): 9:16 top 240, bottom 660, sides 120; 16:9 sides 104, top 86, bottom 96; 1:1 and 4:5 sides 96, top 86, bottom 110
+  const SZ = tall ? { l: 120 * u, r: W - 120 * u, top: 240 * u, bot: H - 660 * u } : land ? { l: 104 * u, r: W - 104 * u, top: 86 * u, bot: H - 96 * u }
+                  : { l: 96 * u, r: W - 96 * u, top: 86 * u, bot: H - 110 * u };
+  const add = (cls, html) => { const d = document.createElement('div'); d.className = 'abs ' + cls; d.innerHTML = html; st.appendChild(d); return d; };
+  const fitW = (els, max) => { const w = Math.max(...els.map(e => K.measure(e).width)); if (w > max) els.forEach(e => e.style.fontSize = (parseFloat(e.style.fontSize) * max / w) + 'px'); };
+  const PX = !land ? { form: 112, count: 26, a1: 118, a2: 168, echo: 260, small: 44, title: 92, line: 26, logo: 560 }
+                      : { form: 104, count: 24, a1: 104, a2: 150, echo: 300, small: 40, title: 96, line: 24, logo: 640 };
+
+  // FORM: counter + state word in a masked slot. bl = bottom-left of the safe zone, tl = top-left, under = centred under the shape
+  const F = T.forms || [], pos = TL.TYPE_POS || 'bl';
+  const form = add('form', `<div class="count" style="color:${TL.ACCENT};font-size:${PX.count * u}px;margin-bottom:${10 * u}px"></div>` +
+    `<div class="slot"><span class="hype shadow" style="color:${TL.INK};font-size:${PX.form * u}px">X</span></div>`);
+  const fword = form.querySelector('.slot>span'), fcount = form.querySelector('.count');
+  let fmax = 0; for (const [, w] of F) { fword.textContent = w; fmax = Math.max(fmax, K.measure(fword).width); }
+  if (fmax > (SZ.r - SZ.l) * 0.94) fword.style.fontSize = (PX.form * u * (SZ.r - SZ.l) * 0.94 / fmax) + 'px';   // fit the WIDEST word once
+  const placeForm = () => { const r = K.measure(form);
+    if (pos === 'tl') { form.style.left = SZ.l + 'px'; form.style.top = SZ.top + 'px'; }
+    else if (pos === 'under') { form.style.left = (W - r.width) / 2 + 'px'; form.style.textAlign = 'center'; form.style.top = H * (tall ? 0.62 : land ? 0.77 : ar < 0.85 ? 0.64 : 0.7) + 'px'; }
+    else { form.style.left = SZ.l + 'px'; form.style.top = (SZ.bot - r.height) + 'px'; } };
+
+  // STACK (Lockup A)
+  const lockA = {};
+  for (const k of Object.keys(T).filter(k => k.startsWith('lockA'))) {
+    const d = add('lockA hype shadow', `<span class="l" style="color:${TL.INK};font-size:${PX.a1 * u}px">${C[k][0]}</span><span class="l" style="color:${TL.ACCENT};font-size:${PX.a2 * u}px;margin-top:-0.13em">${C[k][1]}</span>`);
+    fitW([...d.querySelectorAll('.l')], (SZ.r - SZ.l) * 0.96); d.style.left = SZ.l + 'px'; d.style.top = (SZ.bot - K.measure(d).height) + 'px'; lockA[k] = d;
+  }
+  // ECHO: hero word, outlined copies cascading below (ECHO_POS.bottom = hero baseline as a fraction of H)
+  let echo = null;
+  if (T.echo) {
+    const E = TL.ECHO_POS || { bottom: 0.42, ghosts: 3, step: 154 };
+    echo = add('echo hype', `<span class="small" style="color:${TL.INK};font-size:${PX.small * u}px;margin-bottom:${12 * u}px">${C.echo[0]}</span><span class="hero" style="color:${TL.ACCENT};font-size:${PX.echo * u}px">${C.echo[1]}</span>` +
+      [...Array(E.ghosts)].map(() => `<span class="ghost" style="font-size:${PX.echo * u}px">${C.echo[1]}</span>`).join(''));
+    echo.style.left = '0'; echo.style.right = '0';
+    const hero = echo.querySelector('.hero'); fitW([hero, ...echo.querySelectorAll('.ghost')], SZ.r - SZ.l);
+    const hh = K.measure(hero).height; echo.querySelectorAll('.ghost').forEach(g => g.style.marginTop = (E.step * u - hh) + 'px');
+    const chin = H * 0.27 + 170 * Math.min(W, H * 9 / 16) / 1080;   // keyframes put the eyes at 27% of H; the head scales with the figure, so a wide frame never lets the echo climb onto the face
+    echo.style.top = Math.max(chin, H * E.bottom - (K.measure(hero).bottom - K.measure(echo).top)) + 'px';
+  }
+  // END: traced logo + title + rules + spaced line
+  let end = null, logoBox = null;
+  if (T.end) {
+    end = add('end', `<div class="lg"></div><span class="t hype" style="display:inline-block;color:${TL.INK};font-size:${PX.title * u}px">${C.end[0]}</span>` +
+      `<span class="s" style="color:${TL.INK};opacity:.85;font-size:${PX.line * u}px;margin-top:${44 * u}px">${C.end[1]}</span><i class="rule rl" style="background:${TL.RULE}"></i><i class="rule rr" style="background:${TL.RULE}"></i>`);
+    if (TL.END_LOGO) {
+      const L = await MK.loadLogo('/ui/logo.json'), [bx, by, bw, bh] = L.bbox, lw = PX.logo * u, lh = lw * bh / bw;
+      end.querySelector('.lg').innerHTML = `<svg width="${lw}" height="${lh}" viewBox="${bx} ${by} ${bw} ${bh}" style="display:block;margin:0 auto ${48 * u}px">${MK.logoSVG(L)}</svg>`;
+      logoBox = end.querySelector('.lg svg');
+    }
+    const tt = end.querySelector('.t'); if (!C.end[0]) tt.style.display = 'none';
+    fitW([tt], (SZ.r - SZ.l) * 0.94);
+    const mu = Math.min(Math.min(W, H) / 1080 * (land ? 1.3 : 1.0), W * 0.77 / 900);   // morph.html's scale: END_Y is set on 16:9, so keep its gap below the landed logo in every size
+    end.style.top = (logoBox ? H * 0.44 - K.measure(logoBox).height / 2 : TL.MORPH ? H * (tall ? 0.42 : 0.44) + ((TL.END_Y || 0.61) - 0.44) * 1080 / 1.3 * mu : H * (TL.END_Y || 0.44)) + 'px';
+  }
+  const show = (el, on) => { el.style.display = on ? 'block' : 'none'; return on; };
+
+  window.render = t => {
+    // FORM: roll in on each landing (0.32 s expo out from below), roll out 0.16 s up just before the next one
+    const fi = F.findIndex((f, i) => t >= f[0] && t < (F[i + 1] ? F[i + 1][0] : T.forms_out));
+    if (show(form, fi >= 0 && t < T.forms_out + 0.2)) {
+      const i = fi >= 0 ? fi : F.length - 1, [a] = F[i], b = F[i + 1] ? F[i + 1][0] : T.forms_out;
+      fword.textContent = F[i][1]; fcount.textContent = `${TL.FORM_LABEL || 'FORM'} ${String(i + 1).padStart(2, '0')}/${String(F.length).padStart(2, '0')}`; placeForm();
+      const inn = MK.E.expoOut(K.seg(t, a, a + 0.32)), out = MK.E.p3In(K.seg(t, b - 0.16, b));
+      K.set(fword, { y: (1 - inn) * 105 * u * PX.form / 100 - out * 110 * u * PX.form / 100 });
+      K.set(fcount, { o: K.seg(t, F[0][0], F[0][0] + 0.3) * (1 - K.seg(t, T.forms_out - 0.16, T.forms_out)) });
+    }
+    for (const [k, d] of Object.entries(lockA)) { const [a, b] = T[k]; if (show(d, t >= a - .01 && t < b + .26)) K.lockupA(d, t, a, b); }
+    if (echo) { const [a, b] = T.echo; if (show(echo, t >= a - .01 && t < b + .3)) K.echo(echo, t, a, b); }
+    if (end) { const [a] = T.end;
+      if (show(end, t >= a)) {
+        if (logoBox) K.set(logoBox, { s: MK.lerp(1.12, 1, MK.E.expoOut(K.seg(t, a, a + 0.6))), o: K.seg(t, a, a + 0.25), blur: (1 - K.seg(t, a, a + 0.35)) * 10 });
+        const tt = end.querySelector('.t'); if (C.end[0]) K.slam(tt, t, a + 0.35);
+        const ref = C.end[0] ? tt : end.querySelector('.s'), r = K.measure(ref), g = MK.E.expoOut(K.seg(t, a + .5, a + 1.2)), half = 140 * u * g, er = end.getBoundingClientRect();
+        const y = (C.end[0] ? r.bottom + 14 * u : r.top - 18 * u) - er.top;
+        Object.assign(end.querySelector('.rl').style, { left: (W / 2 - half) + 'px', width: half + 'px', top: y + 'px' });
+        Object.assign(end.querySelector('.rr').style, { left: (W / 2) + 'px', width: half + 'px', top: y + 'px' });
+        K.set(end.querySelector('.s'), { o: K.seg(t, a + .7, a + 1.1), y: (1 - MK.E.expoOut(K.seg(t, a + .7, a + 1.2))) * 14 * u });
+      } }
+  };
+  await document.fonts.ready; window.READY = true;
+})();
+</script></body></html>

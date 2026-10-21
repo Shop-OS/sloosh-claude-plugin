@@ -1,0 +1,47 @@
+<!doctype html>
+<!-- ui/liquid.html (morph-shapeshift sub-preset LIQUID BRAND WORLD, 9 s, any format), a pure window.render(t).
+       python3 lib/render_html.py ui/liquid.html --dur 9 --opaque --out frames/liquid --jobs 1
+     pour 0.1-0.9 -> split 1.5-2.7 (necks stretch and snap) -> orbit 2.7-4.5 -> merge 4.4-5.2 + ONE elastic wobble ->
+     BECOME 6.0-7.0: the goo hands over (same frame) to a crisp circle OUTSIDE the filter, which separates into the real
+     letters of the traced logo (flubber.separate), then the layered logo fades in over it. Hold to 9.0. -->
+<html><head><meta charset="utf-8"><style>html,body{margin:0;overflow:hidden;background:#F1ECE4}svg{position:absolute;left:0;top:0}</style></head><body>
+<svg id="sv" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="paper" cx="50%" cy="40%" r="75%">
+  <stop offset="0" stop-color="#F7F3EC"/><stop offset=".7" stop-color="#EDE6DB"/><stop offset="1" stop-color="#E4DCCF"/></radialGradient></defs>
+<rect width="100%" height="100%" fill="url(#paper)"/>
+<g id="goo"><circle id="b0"/><circle id="b1"/><circle id="b2"/><circle id="b3"/></g>
+<g id="crisp"></g><g id="logo"></g></svg>
+<script src="/lib/kit.js"></script><script src="/vendor/flubber.min.js"></script><script src="/lib/morphkit.js"></script>
+<script>
+(async () => {
+  const TL = await loadTL(), W = TL.W, H = TL.H, u = Math.min(W, H) / 1080, CX = W / 2, CY = H * 0.46, LIQ = TL.LIQUID || '#FF5A36';
+  const sv = document.getElementById('sv'); sv.setAttribute('width', W); sv.setAttribute('height', H);
+  const $ = id => document.getElementById(id), E = MK.E, S = K.seg, lerp = MK.lerp;
+  MK.goo('goo-f', 16 * u, sv); $('goo').setAttribute('filter', 'url(#goo-f)'); $('goo').setAttribute('fill', LIQ);
+  // the logo's letters: outer rings of its biggest colour layer, fitted jointly to 62% of the frame width
+  const L = await MK.loadLogo('/ui/logo.json'), main = L.layers[0].parts.map(p => p.ring), size = Math.min(W * 0.62, H * 0.9 * L.bbox[2] / L.bbox[3]);
+  const P = MK.fitAll(main, CX, CY, size), circ = MK.circle(CX, CY, 140 * u), sep = MK.separate(circ, P);
+  $('crisp').innerHTML = P.map(() => `<path fill="${LIQ}"/>`).join('');
+  const [bx, by, bw, bh] = L.bbox, k = size / Math.max(bw, bh);
+  $('logo').innerHTML = `<g transform="translate(${CX} ${CY}) scale(${k}) translate(${-(bx + bw / 2)} ${-(by + bh / 2)})">${MK.logoSVG(L)}</g>`;
+  const set = (id, a) => Object.entries(a).forEach(([n, v]) => $(id).setAttribute(n, v));
+  window.render = t => {
+    // POUR: a drop falls in, lands with a squash (volume kept) and one wobble
+    const pour = E.p3InOut(S(t, 0.1, 0.9)), land = Math.exp(-Math.max(0, t - 0.9) / 0.18) * Math.sin(Math.max(0, t - 0.9) * 18) * (t > 0.9 ? 1 : 0);
+    let r0 = 120 * pour, y0 = lerp(CY - 260 * u, CY, pour);
+    // SPLIT: children leave to 3 points 175 px out; the parent gives up volume (area within +-15%); the children breathe
+    const sp = E.p3InOut(S(t, 1.5, 2.7)), mg = E.p3In(S(t, 4.4, 5.2)), orbit = 120 * E.p3InOut(S(t, 2.7, 4.5));
+    r0 = t < 1.5 ? r0 : t < 5.1 ? lerp(120, 84, sp) : 150 - 10 * E.elastic(S(t, 5.1, 5.9));
+    const kids = [0, 120, 240].map((a, i) => { const ang = (a + orbit) * Math.PI / 180, d = 175 * u * sp * (1 - mg);
+      const br = 70 - 12 * Math.sin(Math.PI * S(t, 2.75 + i * 0.1, 3.95 + i * 0.1)); return [CX + d * Math.sin(ang), CY - d * Math.cos(ang), t < 1.45 || t > 5.2 ? 0 : lerp(br, 40, mg) * u]; });
+    set('b0', { cx: CX, cy: y0, r: r0 * u });
+    $('b0').setAttribute('transform', `translate(${CX} ${CY + r0 * u}) scale(${1 + 0.12 * land} ${1 - 0.1 * land}) translate(${-CX} ${-(CY + r0 * u)})`);
+    kids.forEach(([x, y, r], i) => set('b' + (i + 1), { cx: x, cy: y, r }));
+    // BECOME: same-frame hand-off at 6.0 (goo hidden, crisp circle of the same radius), then the circle separates into the letters
+    const bec = t >= 6.0; $('goo').setAttribute('opacity', bec ? 0 : 1); r0 = bec ? 140 : r0;
+    const v = E.expoInOut(S(t, 6.05, 7.05)); [...$('crisp').children].forEach((p, i) => p.setAttribute('d', !bec ? '' : v < 0.01 ? (i ? '' : MK.d(circ)) : sep[i](v)));   // solid circle on the hand-off frame (no seams)
+    $('crisp').setAttribute('opacity', 1 - S(t, 7.1, 7.35)); $('logo').setAttribute('opacity', S(t, 7.05, 7.3));
+    $('logo').setAttribute('transform', `translate(${CX} ${CY}) scale(${MK.overshoot(t, 7.05, 0.03)}) translate(${-CX} ${-CY})`);
+  };
+  window.READY = true;
+})();
+</script></body></html>

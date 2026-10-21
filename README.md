@@ -4,6 +4,11 @@
 
 Sloosh makes product images, ad variants and short product videos, and runs the published Sloosh Spaces in your workspace. This plugin connects Claude to your Sloosh workspace and adds six skills: product imagery, ad variants, published Spaces, product video, UGC storyboards and launch films.
 
+This marketplace also has two packs. Each pack is a separate plugin that needs this core plugin:
+
+- [Sloosh for Shopify stores](#sloosh-for-shopify-stores) (`sloosh-shopify`) makes catalog images, launch ads with copy and short product page videos for the products in a Shopify store.
+- [Sloosh motion films](#sloosh-motion-films) (`sloosh-motion`) makes stylised short films on your computer, such as product reveals, beat-synced edits and software walkthroughs.
+
 Sloosh uses the credits and the daily spending allowance of the workspace you connect. Claude shows you the quoted credits and asks for your approval. Sloosh blocks paid calls above your "Ask before spending more than" amount until you approve. You set the daily allowance in Sloosh settings. Claude cannot raise it, buy credits or change your plan.
 
 ## Install in Claude Code
@@ -88,7 +93,7 @@ The launch film skill directs and renders a SaaS or product launch film with Rem
 
 ## Sloosh for Shopify stores
 
-This marketplace also has a second plugin, Sloosh for Shopify stores. It turns the products in a Shopify store into catalog images, launch ads with copy and short product page videos, from a brand kit that it saves once. It reads products and basic shop information only and never changes the store. It needs this core plugin. Install it after the core plugin:
+Sloosh for Shopify stores turns the products in a Shopify store into catalog images, launch ads with copy and short product page videos, from a brand kit that it saves once. It reads products and basic shop information only and never changes the store. It needs this core plugin. Install it after the core plugin:
 
 ```
 /plugin install sloosh-shopify@sloosh
@@ -96,9 +101,19 @@ This marketplace also has a second plugin, Sloosh for Shopify stores. It turns t
 
 In Codex, run `codex plugin add sloosh-shopify@sloosh`. See [packs/sloosh-shopify/README.md](packs/sloosh-shopify/README.md) for its skills and how it gets products.
 
+## Sloosh motion films
+
+Sloosh motion films makes stylised short films on your computer: product reveals, beat-synced edits, software walkthroughs and feature announcements, kinetic typography, glitch, dot-matrix and morph films. When a shot is missing, Claude can make stills and clips with Sloosh after you approve each round's quote. The films render locally, so the pack runs in a coding agent that can run commands on your computer, such as Claude Code. It needs Python 3.9 or later with numpy, OpenCV and SciPy, ffmpeg, and Playwright with its Chromium browser. The agent asks you before it installs anything. It needs this core plugin. Install it after the core plugin:
+
+```
+/plugin install sloosh-motion@sloosh
+```
+
+In Codex, run `codex plugin add sloosh-motion@sloosh`. See [packs/sloosh-motion/README.md](packs/sloosh-motion/README.md) for its skills and how a film is made.
+
 ## What the plugin sends
 
-The plugin runs no code on its own. The launch film skill includes scripts and a Remotion project template that run on your computer only when you ask for a film. Claude calls the Sloosh server at https://mcp.sloosh.ai/mcp with the prompts, images and choices you give it, using the access you grant when you connect. Sloosh stores the images and videos it makes in your workspace.
+The plugin runs no code on its own. The launch film skill includes scripts and a Remotion project template that run on your computer only when you ask for a film. Claude calls the Sloosh server at https://mcp.sloosh.ai/mcp with the prompts, images and choices you give it, using the access you grant when you connect. Sloosh stores the images and videos it makes in your workspace. Each pack's README says what that pack sends and reads.
 
 ## Example prompts
 
