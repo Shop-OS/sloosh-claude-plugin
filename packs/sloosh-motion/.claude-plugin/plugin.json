@@ -20,7 +20,7 @@
         "ffmpeg"
     ],
     "icon": "./assets/sloosh.png",
-    "repository": "https://github.com/Shop-OS/sloosh-claude-plugin",
+    "repository": "https://github.com/Shop-OS/sloosh-plugin",
     "privacyPolicyUrl": "https://sloosh.ai/privacy-policy",
     "dependencies": ["sloosh"]
 }
