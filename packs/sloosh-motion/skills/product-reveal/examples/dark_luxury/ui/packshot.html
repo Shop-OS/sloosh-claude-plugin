@@ -1,0 +1,99 @@
+<!doctype html>
+<!-- ui/packshot.html: the code packshot with the REAL product cutout (signature moves and lockup L1 in SKILL.md).
+       python3 lib/render_html.py ui/packshot.html --from <T_PACK> --dur <LEN - T_PACK> --out frames/pack --jobs 1
+     Transparent page over the empty set plate. Layer order = the cut-out layering:
+       veil (end-card background lift) -> NAME lockup passing BEHIND the product -> contact shadow -> reflection
+       -> the real cutout (plates/product_cut.png) -> specular sweep masked to the cutout's alpha.
+     The name sits on the product's MEASURED narrowest band (RV.narrowBand), so the product hides the fewest letters.
+     Position and size of the product come from tl.PACK (measured from the approved hero still), in px of a frame whose
+     short side is 1080 (k = min(W, H) / 1080), so the same page works for 9:16, 16:9, 1:1 and 4:5. -->
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'Archivo';src:url('/fonts/archivo-latin-wdth-italic.woff2') format('woff2');font-style:italic;font-weight:100 900;font-stretch:62% 125%;font-display:block}
+@font-face{font-family:'Bodoni Moda';src:url('/fonts/bodoni-moda-latin-600-italic.woff2') format('woff2');font-weight:600;font-style:italic;font-display:block}
+html,body{margin:0;background:transparent;overflow:hidden}
+#stage{position:absolute;left:0;top:0;overflow:hidden}
+.abs{position:absolute}
+.hype{font-family:'Archivo';font-style:italic;font-weight:900;font-stretch:125%;text-transform:uppercase;line-height:.86;letter-spacing:-.01em;white-space:nowrap}
+.serif .hype{font-family:'Bodoni Moda';font-weight:600;font-stretch:100%;text-transform:none;letter-spacing:-.02em}
+.nl{position:absolute;left:0;right:0;text-align:center}
+.nl span{display:inline-block}
+#refl{-webkit-mask-image:linear-gradient(0deg,rgba(0,0,0,0) 62%,#000 100%);mask-image:linear-gradient(0deg,rgba(0,0,0,0) 62%,#000 100%)}
+#shadow{border-radius:50%;background:radial-gradient(50% 50% at 50% 50%,rgba(0,0,0,.92),rgba(0,0,0,0))}
+</style></head><body><div id="stage">
+  <div id="veil" class="abs" style="inset:0"></div>
+  <div id="n1" class="nl hype"><span></span></div>
+  <div id="n2" class="nl hype"><span></span></div>
+  <div id="shadow" class="abs"></div>
+  <img id="refl" class="abs" src="/plates/product_cut.png">
+  <div id="prodWrap" class="abs"><img id="prod" src="/plates/product_cut.png" style="width:100%;height:100%;display:block"><div id="sweep" class="abs" style="inset:0"></div></div>
+</div>
+<script src="/lib/kit.js"></script>
+<script src="/lib/reveal.js"></script>
+<script>
+(async () => {
+  const TL = await loadTL(), W = TL.W, H = TL.H, C = TL.COPY, T = TL.TYPE, P = TL.PACK, serif = TL.TYPE_FAMILY === 'serif';
+  if (serif) document.body.classList.add('serif');
+  const k = Math.min(W, H) / 1080, tall = H / W > 1.6;            // PACK and type px are for a 1080 short side; tall = 9:16
+  const st = document.getElementById('stage'); st.style.width = W + 'px'; st.style.height = H + 'px';
+  const img = document.getElementById('prod'); await img.decode();
+  await Promise.all(['italic 900 100px Archivo', 'italic 600 100px "Bodoni Moda"'].map(f => document.fonts.load(f)));
+  const title = s => serif ? s.toLowerCase().replace(/(^|\s)(\S)/g, (m, a, b) => a + b.toUpperCase()) : s;
+  const SZ = tall ? { l: 120 * k, r: W - 120 * k, top: 240 * k } : { l: W * .07, r: W * .93, top: H * .08 }, SW = SZ.r - SZ.l;
+
+  // ---- product box (measured from the hero still): bottom on the set's floor line, centred on cx
+  const ph = P.height * k, pw = ph * img.naturalWidth / img.naturalHeight, cx = P.cx * k, bot = P.bottom * k;
+  const box = { left: cx - pw / 2, top: bot - ph, w: pw, h: ph };
+  const place = (id, l, t, w, h) => Object.assign(document.getElementById(id).style, { left: l + 'px', top: t + 'px', width: w + 'px', height: h + 'px' });
+  place('prodWrap', box.left, box.top, pw, ph);
+  place('refl', box.left, bot, pw, ph);
+  place('shadow', cx - pw * 0.48, bot - 26 * k, pw * 0.96, 52 * k);
+  K.set('#refl', { sy: -1, origin: '50% 0%', o: P.reflect });
+
+  // ---- L1 NAME lockup BEHIND the product, on the measured narrow band
+  const band = RV.narrowBand(img, 0.06, 0.62);
+  const n1 = document.getElementById('n1'), n2 = document.getElementById('n2');
+  n1.firstChild.textContent = title(C.name[0]); n2.firstChild.textContent = title(C.name[1]);
+  Object.assign(n1.firstChild.style, { color: TL.INK, fontSize: (serif ? 120 : 104) * k + 'px', letterSpacing: serif ? '0' : '.06em' });
+  Object.assign(n2.firstChild.style, { color: TL.ACCENT, fontSize: (serif ? 340 : 300) * k + 'px' });
+  for (const n of [n1, n2]) { const s = n.firstChild, w = K.measure(s).width; if (w > SW) s.style.fontSize = parseFloat(s.style.fontSize) * SW / w + 'px'; }
+  const bandY = box.top + band.y * ph, h1 = K.measure(n1.firstChild).height;
+  // MEASURED coverage: the product may hide at most 35% of line 2 (mean silhouette width over the glyphs' height).
+  // Too much hidden -> open the tracking (letters move out past the silhouette) until it fits the safe width.
+  const s2 = n2.firstChild, cover = () => { const r = K.measure(s2), gh = r.height * 0.4;
+    return RV.meanWidth(band, band.y - gh / ph, band.y + gh / ph) * pw / r.width; };
+  for (let ls = 0.04; cover() > 0.35 && ls <= 0.4; ls += 0.04) {
+    s2.style.letterSpacing = ls + 'em'; s2.style.paddingLeft = ls + 'em';
+    if (K.measure(s2).width > SW) { s2.style.letterSpacing = (ls - 0.04) + 'em'; s2.style.paddingLeft = (ls - 0.04) + 'em'; break; }
+  }
+  window.COVER = cover();
+  const h2 = K.measure(s2).height;
+  n2.style.top = (bandY - h2 * 0.5) + 'px';
+  // line 1 above the product's top when there is room (fully readable); else tucked above line 2
+  const roomAbove = box.top - SZ.top;
+  n1.style.top = (roomAbove > h1 * 1.15 ? box.top - h1 * 1.1 : bandY - h2 * 0.5 - h1 * 0.92) + 'px';
+  window.BAND = band;                                             // inspect in QA: the band the name sits on
+
+  // ---- motion constants from the timeline
+  const T0 = TL.T_PACK, TE = TL.T_END, [na, nb] = T.name;
+  window.render = t => {
+    // the name passes behind: line 2 in from the right, line 1 in from the left; both leave with a whip
+    RV.pass(n2, t, na, nb, { from: W * 1.02, to: -W * 1.2, drift: -46 * k, inDur: 0.5 });
+    RV.pass(n1, t, na + 0.08, nb - 0.04, { from: -W * 0.83, to: W * 1.02, drift: 30 * k, inDur: 0.5 });
+    // product: settles from 1.04 with a focus pull, floats, steps back into the end card
+    const fl = RV.float(t, T0, { amp: P.float, period: 3.0, rot: 0.5 });
+    const sb = K.E.inOut(K.seg(t, TE - 0.15, TE + 1.05));
+    const s = K.lerp(1.04, 1, K.E.out(K.seg(t, T0, T0 + 0.9), 4)) * K.lerp(1, P.end_scale, sb);
+    const dy = K.lerp(0, (P.end_bottom - P.bottom) * k, sb) + fl.y * k;
+    K.set('#prodWrap', { y: dy, s, r: fl.r, origin: '50% 100%', blur: RV.focus(t, T0, 0.6, 10) });
+    K.set('#refl', { y: -fl.y * k + K.lerp(0, (P.end_bottom - P.bottom) * k, sb), sy: -s, sx: s, origin: '50% 0%', o: P.reflect * (1 - sb) });
+    RV.shadow('#shadow', t, T0, { period: 3.0, fade: 1 - sb });
+    RV.sweeps('#sweep', t, [[T0 + 0.3, 1.1, { mask: '/plates/product_cut.png', width: 11, angle: 100, peak: 0.75 }],
+                            [TE + 1.0, 1.2, { mask: '/plates/product_cut.png', width: 9, angle: 80, peak: 0.55, reverse: true }]]);
+    // end card: the set lifts into a soft glow behind the stepped-back product
+    const v = document.getElementById('veil'); v.style.display = t >= TE - 0.15 ? 'block' : 'none';
+    if (t >= TE - 0.15) RV.bgLift(v, t, TE - 0.15, 1.4, { base: TL.BASE, lit: TL.LIT, cover: true, coverDur: 0.6 });
+  };
+  await document.fonts.ready; window.READY = true;
+})();
+</script></body></html>

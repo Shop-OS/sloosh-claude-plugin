@@ -1,0 +1,18 @@
+<!doctype html>
+<!-- kt_stretch.html: VARIABLE STRETCH. Archivo variable (wdth 62-125, wght 100-900), caps, black field then an
+     acid accent block. Every move is an AXIS move (font-variation-settings), never letter-spacing or a fake scaleX.
+     Archivo has no slant axis, so the beat snaps use a short skew on each letter instead.
+     Render: python3 lib/render_html.py ui/kt_stretch.html --dur <LEN> --out frames/kt_stretch --jobs 1 -->
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="/lib/kt.css">
+<style>
+@font-face{font-family:'Archivo';src:url('/fonts/archivo-latin-wdth-normal.woff2') format('woff2');font-weight:100 900;font-stretch:62% 125%;font-display:block}
+@font-face{font-family:'JetBrains Mono';src:url('/fonts/jetbrains-mono-latin-wght-normal.woff2') format('woff2');font-weight:100 800;font-display:block}
+.d{font-family:'Archivo';font-weight:900;font-variation-settings:"wght" 900,"wdth" 100;text-transform:uppercase;letter-spacing:0}
+.s,.m{font-family:'JetBrains Mono';font-weight:600}
+.board{font-family:'JetBrains Mono';font-weight:700}
+</style></head><body><div id="stage"></div>
+<script src="/lib/kit.js"></script><script src="/lib/ktkit.js"></script>
+<script>
+KT.boot({ fonts: ['900 100px Archivo', '600 100px "JetBrains Mono"', '700 100px "JetBrains Mono"'], axes: { wdth: [62, 125] }, slnt: -10 });
+</script></body></html>

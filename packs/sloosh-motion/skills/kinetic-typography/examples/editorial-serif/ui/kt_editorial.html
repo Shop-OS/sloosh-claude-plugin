@@ -1,0 +1,21 @@
+<!doctype html>
+<!-- kt_editorial.html: EDITORIAL SERIF. Fraunces variable (opsz 144, wght 300-900, SOFT, WONK) + its italic for the accent phrase,
+     Inter Tight 600 tracked kickers. Warm paper field, oxblood accent, marker band, strike, variable-axis "ink swell".
+     Optional AI plate with the subject IN FRONT of the masthead (tl.PLATE with a matte).
+     Render: python3 lib/render_html.py ui/kt_editorial.html --dur <LEN> --out frames/kt_editorial --jobs 1 -->
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="/lib/kt.css">
+<style>
+@font-face{font-family:'Fraunces';src:url('/fonts/fraunces-latin-full-normal.woff2') format('woff2');font-style:normal;font-weight:100 900;font-display:block}
+@font-face{font-family:'Fraunces';src:url('/fonts/fraunces-latin-full-italic.woff2') format('woff2');font-style:italic;font-weight:100 900;font-display:block}
+@font-face{font-family:'Inter Tight';src:url('/fonts/inter-tight-latin-wght-normal.woff2') format('woff2');font-weight:100 900;font-display:block}
+.d{font-family:'Fraunces';font-weight:380;font-variation-settings:"opsz" 144,"wght" 380,"SOFT" 0,"WONK" 0;letter-spacing:-.025em}
+.it{font-family:'Fraunces';font-style:italic;font-weight:380;font-variation-settings:"opsz" 144,"wght" 380,"SOFT" 100,"WONK" 1;color:var(--acc)}
+.s{font-family:'Inter Tight';font-weight:600}
+.s.kick{letter-spacing:.2em;padding-left:.2em}
+#stage{--mark:#E9D9A6}
+</style></head><body><div id="stage"></div>
+<script src="/lib/kit.js"></script><script src="/lib/ktkit.js"></script>
+<script>
+KT.boot({ fonts: ['380 100px Fraunces', 'italic 380 100px Fraunces', '600 100px "Inter Tight"'] });
+</script></body></html>

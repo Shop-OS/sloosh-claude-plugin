@@ -1,0 +1,81 @@
+<!doctype html>
+<!-- ui/type.html (glitch-fx): the glitch type system, rendered to a transparent PNG sequence:
+       python3 lib/render_html.py ui/type.html --dur <LEN> --jobs 1 --out frames/type
+     Archivo upright, width 125, weight 900, UPPERCASE (hard tech display) + the vendored mono font for labels.
+     Lockups: STACK (stutter-in, hard cut out), LABEL (typed mono with a block cursor), SLAM (instant, 3-frame settle),
+     END (wordmark stutter + typed tagline). Chroma fringe: a 4-frame burst on every entrance, then a 3 px rest offset.
+     Every position is MEASURED after the fonts load; every line auto-fits the safe zone. Copy and cues come from tl.json.
+     Tearing is NOT done here: edit.py tears this layer on its entrances (gk.over tears=) and whole-frame hits tear it too. -->
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'Archivo';src:url('/fonts/archivo-latin-wdth-normal.woff2') format('woff2');font-style:normal;font-weight:100 900;font-stretch:62% 125%;font-display:block}
+@font-face{font-family:'Film Mono';src:url('/fonts/jetbrains-mono-latin-500-normal.woff2') format('woff2');font-weight:500;font-display:block}
+html,body{margin:0;background:transparent;overflow:hidden}
+#stage{position:absolute;left:0;top:0;overflow:hidden}
+.hard{font-family:'Archivo';font-weight:900;font-stretch:125%;text-transform:uppercase;line-height:.84;letter-spacing:-.02em;white-space:nowrap}
+.mono{font-family:'Film Mono';font-weight:500;text-transform:uppercase;white-space:nowrap}
+.blk{position:absolute}
+.ln{display:table}
+.ch{display:inline-block}
+.shadow{filter:drop-shadow(0 calc(var(--u)*6px) calc(var(--u)*16px) rgba(0,0,0,.55))}
+</style></head><body><div id="stage"></div>
+<script src="/lib/kit.js"></script>
+<script>
+(async () => {
+  const TL = await loadTL(), W = TL.W, H = TL.H, u = Math.min(W, H) / 1080, C = TL.COPY, T = TL.TYPE, FPS = TL.FPS;
+  await Promise.all(['900 100px Archivo', '500 30px "Film Mono"'].map(f => document.fonts.load(f)));
+  const st = document.getElementById('stage'); st.style.width = W + 'px'; st.style.height = H + 'px'; st.style.setProperty('--u', u);
+  // frame shape from the aspect: tall (9:16, phone UI over the bottom third), portrait (4:5), square, landscape (16:9)
+  const ar = W / H, shape = ar < 0.7 ? 'tall' : ar < 0.85 ? 'portrait' : ar > 1.2 ? 'landscape' : 'square';
+  const SZ = { tall: { l: 120 * u, r: W - 120 * u, top: 240 * u, bot: H - 660 * u }, portrait: { l: W * .08, r: W * .92, top: H * .07, bot: H * .9 },
+               square: { l: W * .07, r: W * .93, top: H * .07, bot: H * .91 }, landscape: { l: W * .054, r: W * .946, top: H * .08, bot: H * .91 } }[shape];
+  const S = { tall: { stack: 172, label: 30, slam: 250, word: 240, tag: 34 }, portrait: { stack: 160, label: 30, slam: 230, word: 220, tag: 32 },
+              square: { stack: 150, label: 28, slam: 220, word: 210, tag: 30 }, landscape: { stack: 150, label: 28, slam: 210, word: 200, tag: 30 } }[shape];  // px when the short side is 1080
+  const hash = (a, b) => { let h = Math.imul(a | 0, 374761393) + Math.imul(b | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+  const [R, Cy] = TL.FRINGE;
+  const chroma = (el, t, t0, rest = 3, amp = 18, n = 4) => {           // burst for n frames, then the rest offset
+    const k = Math.floor((t - t0) * FPS + 1e-6); let dx = rest, dy = 0;
+    if (k >= 0 && k < n) { dx = Math.round(amp * (1 - k / n) * (0.6 + 0.8 * hash(k, 7))); dy = Math.round((hash(k, 9) - .5) * amp * .3); }
+    el.style.textShadow = dx ? `${-dx * u}px ${dy * u}px 0 ${R}, ${dx * u}px ${-dy * u}px 0 ${Cy}` : 'none';
+  };
+  const chars = (txt) => [...txt].map(c => `<span class="ch">${c === ' ' ? '&nbsp;' : c}</span>`).join('');
+  const stutter = (el, t, t0, steps = 6, seed = 3) => {               // letters flicker on in seeded steps every 2 frames
+    const s = Math.floor((t - t0) * FPS / 2 + 1e-6);
+    el.querySelectorAll('.ch').forEach((c, i) => { c.style.opacity = s >= steps ? 1 : (s < 0 ? 0 : (hash(i * 31 + s, seed) < (s + 1) / (steps + 1) ? 1 : 0)); });
+  };
+  const fit = (els, max) => { const w = Math.max(...els.map(e => K.measure(e).width)); if (w > max) els.forEach(e => e.style.fontSize = (parseFloat(e.style.fontSize) * max / w) + 'px'); };
+  const el = (cls, html) => { const d = document.createElement('div'); d.className = cls; d.innerHTML = html; st.appendChild(d); return d; };
+
+  // STACK: bottom-left of the safe zone, line 1 ink, line 2 accent, same size, tight leading
+  const stack = el('blk hard shadow', C.stack.map((w, i) => `<span class="ln" style="font-size:${S.stack * u}px;color:${i % 2 ? TL.ACCENT : TL.INK}">${chars(w)}</span>`).join(''));
+  fit([...stack.querySelectorAll('.ln')], (SZ.r - SZ.l) * 0.96);
+  stack.style.left = SZ.l + 'px'; stack.style.top = (SZ.bot - K.measure(stack).height) + 'px';
+  // LABELS: mono, top band of the safe zone, typed on with a block cursor
+  const labels = ['label1', 'label2'].map(k => { const d = el('blk mono', ''); Object.assign(d.style, { left: SZ.l + 'px', top: (SZ.top + 120 * u) + 'px', fontSize: S.label * u + 'px', letterSpacing: '.14em', color: TL.INK }); return [k, d]; });
+  // SLAMS: centred at 40% height, measured, auto-fit; the last one in the accent
+  const slams = C.slams.map((w, i) => { const d = el('blk hard shadow', `<span class="ln" style="font-size:${S.slam * u}px;color:${i === C.slams.length - 1 ? TL.ACCENT : TL.INK}">${w}</span>`);
+    fit([d.firstChild], Math.min((SZ.r - SZ.l) * 0.98, W * 0.8)); const r = K.measure(d.firstChild);   // at most 80% of W: the 1.14 overshoot stays in frame
+    Object.assign(d.style, { left: ((W - r.width) / 2) + 'px', top: (H * 0.40 - r.height / 2) + 'px', transformOrigin: '50% 50%' }); return d; });
+  // END: wordmark centred at 46% height + mono tagline 34 px (scaled) under it
+  const word = el('blk hard', `<span class="ln" style="font-size:${S.word * u}px;color:${TL.INK}">${chars(C.end[0])}</span>`);
+  fit([word.firstChild], (SZ.r - SZ.l) * 0.9); const wr = K.measure(word.firstChild);
+  Object.assign(word.style, { left: ((W - wr.width) / 2) + 'px', top: (H * 0.46 - wr.height / 2) + 'px' });
+  const tag = el('blk mono', ''); Object.assign(tag.style, { fontSize: S.tag * u + 'px', letterSpacing: '.24em', color: TL.ACCENT });
+  tag.textContent = C.end[1]; fit([tag], (SZ.r - SZ.l) * 0.9); const tw = K.measure(tag).width;
+  Object.assign(tag.style, { left: ((W - tw) / 2 + 0.12 * parseFloat(tag.style.fontSize)) + 'px', top: (H * 0.46 + wr.height / 2 + 34 * u) + 'px' });
+  tag.textContent = '';
+  const typed = (d, txt, t, t0, cps = 30) => { if (t < t0) { d.textContent = ''; return; } const n = Math.max(0, Math.min(txt.length, Math.floor((t - t0) * cps))); const cur = (n < txt.length || Math.floor(t * 4) % 2 === 0) ? '█' : ' '; d.textContent = txt.slice(0, n) + cur; };
+
+  window.render = t => {
+    const on = (a, b) => t >= a - 1e-6 && t < b - 1e-6;
+    const [sa, sb] = T.stack; stack.style.display = on(sa, sb) ? 'block' : 'none';
+    if (on(sa, sb)) { stutter(stack, t, sa); chroma(stack, t, sa); }
+    for (const [k, d] of labels) { const [a, b] = T[k]; d.style.display = on(a, b) ? 'block' : 'none'; if (on(a, b)) typed(d, C[k], t, a); }
+    slams.forEach((d, i) => { const a = T.slams[i], b = T.slams[i + 1]; d.style.display = on(a, b) ? 'block' : 'none';
+      if (on(a, b)) { const k = (t - a) * FPS; K.set(d, { s: k < 3 ? 1.14 - 0.14 * (k / 3) : 1 }); chroma(d, t, a, 3, 24, 3); } });
+    const [ea] = T.end; const endOn = t >= ea - 1e-6; word.style.display = tag.style.display = endOn ? 'block' : 'none';
+    if (endOn) { stutter(word, t, ea, 4, 5); chroma(word, t, ea, t < ea + 2.0 ? 3 : 0, 20, 4); typed(tag, C.end[1], t, ea + 0.45, 28); if (t > ea + 0.45 + C.end[1].length / 28 + 0.6) tag.textContent = C.end[1]; }
+  };
+  await document.fonts.ready; window.READY = true;
+})();
+</script></body></html>

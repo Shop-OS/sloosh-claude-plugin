@@ -1,0 +1,99 @@
+<!doctype html>
+<!-- ui/type.html: the aura edit's type layer, rendered to a transparent PNG sequence:
+       python3 lib/render_html.py ui/type.html --dur <LEN> --out frames/type --jobs 1
+     One family: Archivo variable, italic, width 125, weight 900 (Archivo Expanded Black Italic). Four lockups:
+       A  two-line stack (white over accent), bottom-left, mask wipe + slide        TYPE.lockA_*
+       B  echo stack: one hero word in the accent + 3 outlined copies + small word TYPE.echo
+       C  smear slam: one word per beat, white, with a red smeared copy dragging    TYPE.slams / slam_out
+       D  end card: the name tracking in, a spaced line, red rules from the centre  TYPE.end
+     Copy, cues, colours and positions come from tl.json. Every position is MEASURED after the fonts load. -->
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'Archivo';src:url('/fonts/archivo-latin-wdth-italic.woff2') format('woff2');font-style:italic;font-weight:100 900;font-stretch:62% 125%;font-display:block}
+@font-face{font-family:'Archivo';src:url('/fonts/archivo-latin-wdth-normal.woff2') format('woff2');font-style:normal;font-weight:100 900;font-stretch:62% 125%;font-display:block}
+@font-face{font-family:'Inter Tight';src:url('/fonts/inter-tight-latin-wght-normal.woff2') format('woff2');font-weight:100 900;font-display:block}
+html,body{margin:0;background:transparent;overflow:hidden}
+#stage{position:absolute;left:0;top:0;overflow:hidden}
+.hype{font-family:'Archivo';font-style:italic;font-weight:900;font-stretch:125%;text-transform:uppercase;line-height:.86;letter-spacing:-.01em;white-space:nowrap}
+.shadow{text-shadow:0 0 calc(var(--u)*18px) rgba(0,0,0,.6),0 calc(var(--u)*4px) calc(var(--u)*18px) rgba(0,0,0,.6)}
+.lockA{position:absolute}
+.lockA .l{display:table;will-change:transform}
+.echo{position:absolute;left:0;right:0;text-align:center}
+.echo .hero,.echo .ghost{display:block}
+.echo .ghost{color:transparent;-webkit-text-stroke:calc(var(--u)*3px) #fff}
+.echo .small{display:block;font-size:calc(var(--u)*44px);letter-spacing:.42em;padding-left:.42em;font-style:normal;font-stretch:100%;font-weight:700}
+.slam{position:absolute;left:0;right:0;text-align:center}
+.slam .w{position:relative;display:inline-block}
+.slam .sm{position:absolute;left:0;top:0;z-index:-1}
+.end{position:absolute;left:0;right:0;text-align:center}
+.end .t{display:inline-block}
+.end .s{display:block;font-family:'Inter Tight';font-weight:600;letter-spacing:.32em;padding-left:.32em;text-transform:uppercase}
+.end .rule{position:absolute;height:calc(var(--u)*3px)}
+</style></head><body><div id="stage"></div>
+<script src="/lib/kit.js"></script>
+<script>
+(async () => {
+  const TL = await loadTL(), W = TL.W, H = TL.H, C = TL.COPY, T = TL.TYPE, ar = W / H, land = ar > 1.2, tall = H / W > 1.6;   // 4:5 and 1:1 are neither
+  const u = Math.min(W, H) / 1080;                       // px below are for a frame whose short side is 1080 (9:16, 16:9, 1:1, 4:5)
+  const PX = land ? { a1: 118, a2: 168, echo: 300, small: 44, ghostUp: 130, slam: 260, name: 150, line: 34 }
+                  : { a1: 118, a2: 168, echo: 260, small: 44, ghostUp: 120, slam: 230, name: 150, line: 38 };
+  await Promise.all(['italic 900 100px Archivo', '700 100px Archivo', '600 100px "Inter Tight"'].map(f => document.fonts.load(f)));
+  const st = document.getElementById('stage'); st.style.width = W + 'px'; st.style.height = H + 'px'; st.style.setProperty('--u', u);
+  // safe zone: 9:16 top 240, bottom 660, sides 120 (+ the right UI column is avoided by left-aligning A); 16:9, 1:1 and 4:5: 6% sides, 8% top, 10% bottom
+  const SZ = tall ? { l: 120 * u, r: W - 120 * u, top: 240 * u, bot: H - 660 * u } : { l: W * .06, r: W * .94, top: H * .08, bot: H * .9 };
+  const maxW = SZ.r - SZ.l;
+  const el = (cls, html) => { const d = document.createElement('div'); d.className = cls; d.innerHTML = html; st.appendChild(d); return d; };
+  const fit = (span, max) => { const w = K.measure(span).width; if (w > max) span.style.fontSize = (parseFloat(span.style.fontSize) * max / w) + 'px'; };
+
+  // A: two-line stacks, bottom-left of the safe zone (fit by the measured widest line)
+  const lockA = {};
+  for (const k of Object.keys(T).filter(k => k.startsWith('lockA'))) {
+    const d = el('lockA hype shadow', `<span class="l" style="color:${TL.INK};font-size:${PX.a1 * u}px">${C[k][0]}</span>` +
+                                     `<span class="l" style="color:${TL.ACCENT};font-size:${PX.a2 * u}px;margin-top:-0.13em">${C[k][1]}</span>`);
+    const ls = [...d.querySelectorAll('.l')], widest = Math.max(...ls.map(l => K.measure(l).width)), lim = maxW * 0.96;
+    if (widest > lim) ls.forEach(l => { l.style.fontSize = (parseFloat(l.style.fontSize) * lim / widest) + 'px'; });
+    d.style.left = SZ.l + 'px'; d.style.top = (SZ.bot - K.measure(d).height) + 'px'; lockA[k] = d;
+  }
+  // B: echo stack. The hero word's bottom sits at ECHO_Y*H; the stack never starts above 0.32*H, where the framed face ends (wide and square frames are short)
+  const e = el('echo hype', `<span class="small" style="color:${TL.INK}">${C.echo[0]}</span><span class="hero" style="color:${TL.ACCENT};font-size:${PX.echo * u}px">${C.echo[1]}</span>` +
+    [0, 1, 2].map(() => `<span class="ghost" style="font-size:${PX.echo * u}px;margin-top:${-PX.ghostUp * u}px">${C.echo[1]}</span>`).join(''));
+  for (const s of e.querySelectorAll('.hero,.ghost')) fit(s, maxW);
+  const hero = e.querySelector('.hero');
+  e.style.top = Math.max(H * .32, H * TL.ECHO_Y - (K.measure(hero).bottom - K.measure(e).top)) + 'px';
+  // C: smear slams. White word, a red copy behind it dragged sideways with a horizontal motion blur
+  const slams = C.slams.map((w, i) => {
+    const d = el('slam hype', `<span class="w shadow" style="color:${TL.INK};font-size:${PX.slam * u}px">${w}<span class="sm" style="color:${TL.SMEAR}">${w}</span></span>`);
+    fit(d.querySelector('.w'), maxW); d.querySelector('.sm').style.fontSize = d.querySelector('.w').style.fontSize;
+    d.style.top = (H * TL.SLAM_Y - K.measure(d).height / 2) + 'px'; d.style.transformOrigin = '50% 50%'; return d; });
+  // D: end card, bottom of the safe zone (the lens-look face stays clear above it)
+  const end = el('end', `<span class="t hype" style="color:${TL.INK};font-size:${PX.name * u}px">${C.end[0]}</span>` +
+    `<span class="s" style="color:${TL.INK};opacity:.85;font-size:${PX.line * u}px;margin-top:${30 * u}px">${C.end[1]}</span>` +
+    `<i class="rule rl" style="background:${TL.RULE}"></i><i class="rule rr" style="background:${TL.RULE}"></i>`);
+  const tt = end.querySelector('.t'); tt.textContent = tt.textContent.replace(/ /g, '\u00a0');   // K.track wraps letters in inline-blocks: a plain space would collapse
+  K.track(tt, 1e6, 0, 0.30, 0.06, 1.0); fit(tt, maxW * 0.94);               // fit at the FINAL tracking
+  end.style.top = (SZ.bot - K.measure(end).height) + 'px';
+
+  const show = (d, on) => { d.style.display = on ? 'block' : 'none'; return on; };
+  window.render = t => {
+    for (const [k, d] of Object.entries(lockA)) { const [a, b] = T[k]; if (show(d, t >= a - .01 && t < b + .26)) K.lockupA(d, t, a, b); }
+    const [ea, eb] = T.echo; if (show(e, t >= ea - .01 && t < eb + .3)) K.echo(e, t, ea, eb);
+    slams.forEach((d, i) => {
+      const a = T.slams[i], b = T.slams[i + 1] ?? T.slam_out;
+      if (!show(d, t >= a && t < b)) return;
+      K.slam(d, t, a, b - 0.08);
+      const sm = d.querySelector('.sm'), k = Math.exp(-(t - a) / 0.12);          // the smear drags, then settles behind
+      K.set(sm, { x: -(14 + 70 * k) * u, o: 0.95 }); K.mblur(sm, (6 + 40 * k) * u, 0);
+    });
+    const [na] = T.end;
+    if (show(end, t >= na)) {
+      K.track(tt, t, na, 0.30, 0.06, 1.0);
+      const r = K.measure(tt), top = end.getBoundingClientRect().top, g = K.E.out(K.seg(t, na + .3, na + 1.1)), half = 160 * u * g;
+      const y = (r.bottom - top) + 14 * u, rl = end.querySelector('.rl'), rr = end.querySelector('.rr');
+      Object.assign(rl.style, { left: (W / 2 - half) + 'px', width: half + 'px', top: y + 'px' });
+      Object.assign(rr.style, { left: (W / 2) + 'px', width: half + 'px', top: y + 'px' });
+      K.set(end.querySelector('.s'), { o: K.seg(t, na + .6, na + 1.0), y: (1 - K.E.out(K.seg(t, na + .6, na + 1.1))) * 14 * u });
+    }
+  };
+  await document.fonts.ready; window.READY = true;
+})();
+</script></body></html>

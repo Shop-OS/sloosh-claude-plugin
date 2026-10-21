@@ -1,0 +1,79 @@
+<!doctype html>
+<!-- ui/type.html: the film's type layer, rendered to a transparent PNG sequence:
+     python3 lib/render_html.py ui/type.html --dur <LEN> --out frames/type
+     One family (Archivo variable: italic, width 125, weight 900), two lockups, strict placement, every position measured.
+     Copy, cue times and colours come from tl.json (tl.py), so this page never needs hand-edited times. -->
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'Archivo';src:url('/fonts/archivo-latin-wdth-italic.woff2') format('woff2');font-style:italic;font-weight:100 900;font-stretch:62% 125%;font-display:block}
+@font-face{font-family:'Archivo';src:url('/fonts/archivo-latin-wdth-normal.woff2') format('woff2');font-style:normal;font-weight:100 900;font-stretch:62% 125%;font-display:block}
+@font-face{font-family:'Inter Tight';src:url('/fonts/inter-tight-latin-wght-normal.woff2') format('woff2');font-weight:100 900;font-display:block}
+html,body{margin:0;background:transparent;overflow:hidden}
+#stage{position:absolute;left:0;top:0;overflow:hidden}
+.hype{font-family:'Archivo';font-style:italic;font-weight:900;font-stretch:125%;text-transform:uppercase;line-height:.86;letter-spacing:-.01em;white-space:nowrap}
+.shadow{text-shadow:0 0 calc(var(--u)*18px) rgba(0,0,0,.6),0 calc(var(--u)*4px) calc(var(--u)*18px) rgba(0,0,0,.6)}
+.lockA{position:absolute}
+.lockA .l{display:table;will-change:transform}   /* table = block stacking that shrinks to the text, so measure() returns the real width */
+.echo{position:absolute;left:0;right:0;text-align:center}
+.echo .hero,.echo .ghost{display:block}
+.echo .ghost{color:transparent;-webkit-text-stroke:calc(var(--u)*3px) #fff}
+.echo .small{display:block;font-size:calc(var(--u)*44px);letter-spacing:.42em;padding-left:.42em;font-style:normal;font-stretch:100%;font-weight:700}
+.slam{position:absolute;left:0;right:0;text-align:center}
+.end{position:absolute;left:0;right:0;text-align:center}
+.end .t{display:inline-block;font-family:'Inter Tight';font-weight:800;text-transform:uppercase;white-space:nowrap}
+.end .s{display:block;font-family:'Inter Tight';font-weight:600;letter-spacing:.32em;padding-left:.32em;text-transform:uppercase}
+.end .rule{position:absolute;height:calc(var(--u)*3px);top:50%}
+</style></head><body><div id="stage"></div>
+<script src="/lib/kit.js"></script>
+<script>
+(async () => {
+  const TL = await loadTL(), W = TL.W, H = TL.H, T = TL.TYPE;
+  // copy is text, never HTML: escape it once so an '&' or '<' in a headline cannot break the page
+  const esc = v => Array.isArray(v) ? v.map(esc) : String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const C = Object.fromEntries(Object.entries(TL.COPY).map(([k, v]) => [k, esc(v)]));
+  // three layouts: tall (9:16), wide (16:9) and box (1:1, 4:5 and other near-square frames)
+  const tall = H / W >= 1.6, wide = W / H >= 1.6;
+  const u = wide ? W / 1920 : tall ? W / 1080 : Math.min(W / 1080, H / 1350);   // px below are for a 1080-wide 9:16, a 1920-wide 16:9 or a 1080x1350 4:5 frame
+  // load the faces BEFORE measuring anything (a fallback font measures narrower and the fit would be wrong)
+  await Promise.all(['italic 900 100px Archivo', '900 100px Archivo', '800 100px "Inter Tight"'].map(f => document.fonts.load(f)));
+  const st = document.getElementById('stage'); st.style.width = W + 'px'; st.style.height = H + 'px'; st.style.setProperty('--u', u);
+  // safe zone (9:16 vertical feeds: top 240, bottom 660, sides 120; 16:9: 5.4% sides; 1:1 and 4:5: 7% sides, 8% top, 12% bottom)
+  const SZ = tall ? { l: 120 * u, r: W - 120 * u, top: 240 * u, bot: H - 660 * u } : wide ? { l: W * .054, r: W * .946, top: H * .08, bot: H * .91 } : { l: W * .07, r: W * .93, top: H * .08, bot: H * .88 };
+  const el = (cls, html) => { const d = document.createElement('div'); d.className = cls; d.innerHTML = html; st.appendChild(d); return d; };
+  const sz1 = 118, sz2 = 168, szEcho = wide ? 300 : 260;
+  // Lockup A (two-line stack): bottom-left of the safe zone, never centred over the subject
+  const lockA = {};
+  for (const k of Object.keys(T).filter(k => k.startsWith('lockA'))) {
+    const d = el('lockA hype shadow', `<span class="l" style="color:${TL.INK};font-size:${sz1 * u}px">${C[k][0]}</span><span class="l" style="color:${TL.ACCENT};font-size:${sz2 * u}px;margin-top:-0.13em">${C[k][1]}</span>`);
+    // fit by MEASURED width: the widest line must sit inside the safe zone (measure, never guess)
+    const maxW = (SZ.r - SZ.l) * 0.96, widest = Math.max(...[...d.querySelectorAll('.l')].map(l => K.measure(l).width));
+    if (widest > maxW) d.querySelectorAll('.l').forEach(l => { l.style.fontSize = (parseFloat(l.style.fontSize) * maxW / widest) + 'px'; });
+    d.style.left = SZ.l + 'px'; d.style.top = (SZ.bot - K.measure(d).height) + 'px'; lockA[k] = d;
+  }
+  // Lockup B (echo stack): huge accent word at 42% height, 3 outlined copies cascading below, a small tracked word above
+  const e = el('echo hype', `<span class="small" style="color:${TL.INK}">${C.echo[0]}</span><span class="hero" style="color:${TL.ACCENT};font-size:${szEcho * u}px">${C.echo[1]}</span>` +
+    [0, 1, 2].map(() => `<span class="ghost" style="font-size:${szEcho * u}px;margin-top:${-70 * u}px">${C.echo[1]}</span>`).join(''));
+  e.style.top = (H * 0.42 - K.measure(e.querySelector('.hero')).height) + 'px';
+  // auto-fit: shrink any line wider than the safe zone (measured, never guessed)
+  for (const s of e.querySelectorAll('.hero,.ghost')) { const w = K.measure(s).width, max = SZ.r - SZ.l; if (w > max) s.style.fontSize = (parseFloat(s.style.fontSize) * max / w) + 'px'; }
+  const slams = C.slams.map(w => { const d = el('slam hype shadow', `<span style="color:${TL.INK};font-size:${200 * u}px">${w}</span>`); d.style.top = (H * 0.40) + 'px';
+    const sp = d.firstChild, wd = K.measure(sp).width, max = SZ.r - SZ.l; if (wd > max) sp.style.fontSize = (200 * u * max / wd) + 'px'; d.style.transformOrigin = '50% 50%'; return d; });
+  const end = el('end', `<span class="t" style="color:${TL.INK};font-size:${(wide ? 88 : 84) * u}px">${C.end[0]}</span><span class="s" style="color:${TL.INK};opacity:.8;font-size:${26 * u}px;margin-top:${28 * u}px">${C.end[1]}</span><i class="rule rl" style="background:${TL.RULE}"></i><i class="rule rr" style="background:${TL.RULE}"></i>`);
+  end.style.top = (H * 0.46) + 'px';
+  { // fit the end-card title at its FINAL tracking (0.40 em) inside the safe zone
+    const tt = end.querySelector('.t'); K.track(tt, 1e6, 0, 0.62, 0.40, 1.2);
+    const w = K.measure(tt).width, max = (SZ.r - SZ.l) * 0.94; if (w > max) tt.style.fontSize = (parseFloat(tt.style.fontSize) * max / w) + 'px'; }
+  window.render = t => {
+    for (const [k, d] of Object.entries(lockA)) { const [a, b] = T[k]; d.style.display = (t >= a - .01 && t < b + .26) ? 'block' : 'none'; if (d.style.display === 'block') K.lockupA(d, t, a, b); }
+    const [ea, eb] = T.echo; e.style.display = (t >= ea - .01 && t < eb + .3) ? 'block' : 'none'; if (e.style.display === 'block') K.echo(e, t, ea, eb);
+    slams.forEach((d, i) => { const a = T.slams[i], b = T.slams[i + 1] ?? (a + 2 * TL.B); d.style.display = (t >= a && t < b) ? 'block' : 'none'; if (t >= a && t < b) K.slam(d, t, a, b - 0.08); });
+    const [na] = T.end; end.style.display = t >= na ? 'block' : 'none';
+    if (t >= na) { const tt = end.querySelector('.t'); K.track(tt, t, na, 0.62, 0.40, 1.2);
+      const r = K.measure(tt), g = K.E.out(K.seg(t, na + .3, na + 1.1)), half = 120 * u * g;
+      const rl = end.querySelector('.rl'), rr = end.querySelector('.rr'); const y = (r.top - end.getBoundingClientRect().top) + r.height + 18 * u;
+      Object.assign(rl.style, { left: (W / 2 - half) + 'px', width: half + 'px', top: y + 'px' }); Object.assign(rr.style, { left: (W / 2) + 'px', width: half + 'px', top: y + 'px' });
+      K.set(end.querySelector('.s'), { o: K.seg(t, na + .6, na + 1.0), y: (1 - K.E.out(K.seg(t, na + .6, na + 1.1))) * 14 * u }); }
+  };
+  await document.fonts.ready; window.READY = true;
+})();
+</script></body></html>

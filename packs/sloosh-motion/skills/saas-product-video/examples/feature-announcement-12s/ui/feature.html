@@ -1,0 +1,159 @@
+<!doctype html>
+<!-- ui/feature.html (feature-announcement): the name card and the ONE-feature UI moment, opaque, page time 0 = tl.T_NAME.
+       python3 lib/render_html.py ui/feature.html --dur 6.5 --scale 2 --jobs 1 --out frames/feature     (6.5 = tl.FEAT_NAT)
+     Lays itself out for 1:1, 9:16 and 16:9 from tl.json W/H. REPLACE the CONFIG block and the window markup with the real
+     product UI rebuilt from the user's screenshots. Never invent a feature. Cue times come from tl.json FEAT_CUES.
+       0.00-1.90  NEW pill pops (sparkle), the feature name lands in the hype face with a shine bar, the benefit blurs in
+                  word by word in the editorial serif; everything exits up with blur (the edit puts the breath at 1.90-2.00)
+       2.00-2.70  DROP: the editor window springs in from a 3D tilt
+       2.45-3.50  macro on the toolbar; the cursor clicks the feature chip (MEASURED); the menu pops with overshoot
+       3.45-4.50  hover; click "All channels"
+       4.05-5.60  A becomes B: the one 4:5 post splits into three cards that morph to 1:1, 9:16 and 16:9; a check pops on each
+       5.60-6.50  hold with a slow push -->
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'Archivo';src:url('/fonts/archivo-latin-wdth-italic.woff2') format('woff2');font-style:italic;font-weight:100 900;font-stretch:62% 125%;font-display:block}
+@font-face{font-family:'Inter Tight';src:url('/fonts/inter-tight-latin-wght-normal.woff2') format('woff2');font-weight:100 900;font-display:block}
+@font-face{font-family:'Instrument Serif';src:url('/fonts/instrument-serif-latin-400-italic.woff2') format('woff2');font-style:italic;font-weight:400;font-display:block}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow:hidden;background:#FFF3EC;font-family:'Inter Tight';color:#1F1C19}
+#stage{position:absolute;left:0;top:0;overflow:hidden}
+#bg,#cam,.persp{position:absolute;inset:0}
+#cam{transform-origin:0 0}.persp{perspective:2400px}
+#name{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center}
+#pill{border-radius:999px;color:#fff;font-weight:800;letter-spacing:.2em;padding-left:.2em}
+#fname{position:relative;overflow:hidden;font-family:'Archivo';font-style:italic;font-weight:900;font-stretch:125%;text-transform:uppercase;letter-spacing:-.01em;line-height:1;white-space:nowrap;padding:0 .12em}
+#ben{font-family:'Instrument Serif';font-style:italic;white-space:nowrap}
+#ben span{display:inline-block;margin:0 .1em}
+#win{position:absolute;border-radius:26px;background:#fff;overflow:hidden;box-shadow:0 0 0 1px rgba(30,24,18,.09),0 50px 120px rgba(120,50,10,.25);transform-origin:50% 60%}
+.bar{height:44px;display:flex;align-items:center;gap:9px;padding:0 18px;border-bottom:1px solid rgba(30,24,18,.08);background:#FBFAF8}
+.bar i{width:12px;height:12px;border-radius:50%;background:#E2DDD7;display:block}
+#tools{position:absolute;left:70px;right:0;top:44px;height:70px;display:flex;align-items:center;gap:12px;padding:0 22px;border-bottom:1px solid rgba(30,24,18,.08)}
+.chipT{height:42px;border-radius:12px;border:1.5px solid rgba(30,24,18,.1);display:flex;align-items:center;gap:10px;padding:0 16px;font-size:17px;font-weight:600;color:#4A443E;white-space:nowrap}
+.chipT b{width:18px;height:18px;border-radius:5px;background:#DDD7D0;display:block}
+#rz{position:relative;overflow:hidden}
+#rz .nw{font-size:11px;font-weight:800;letter-spacing:.12em;color:#fff;border-radius:6px;padding:3px 6px}
+#rail{position:absolute;left:0;top:44px;bottom:0;width:70px;border-right:1px solid rgba(30,24,18,.08);background:#F7F5F2;display:flex;flex-direction:column;align-items:center;gap:16px;padding-top:24px}
+#rail b{width:30px;height:30px;border-radius:9px;background:#E2DCD5;display:block}
+#work{position:absolute;left:70px;right:0;top:114px;bottom:0;background:#F4F1EC}
+.card{position:absolute;border-radius:14px;overflow:hidden;box-shadow:0 18px 40px rgba(60,30,10,.18);background:#ddd}
+.card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.lab{position:absolute;display:flex;align-items:center;gap:8px;font-weight:700;color:#4A443E;white-space:nowrap}
+.lab i{border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-style:normal;font-weight:800}
+#menuwrap{position:absolute;width:300px;height:250px;z-index:20}
+#menu{position:absolute;inset:0;border-radius:16px;background:#fff;box-shadow:0 0 0 1px rgba(30,24,18,.09),0 24px 60px rgba(60,30,10,.2);padding:10px;transform-origin:20% 0}
+#menu div{height:56px;border-radius:11px;display:flex;align-items:center;padding:0 14px;font-size:18px;font-weight:500;white-space:nowrap}
+.spk{position:absolute;left:0;top:0}
+#cur{position:absolute;left:0;top:0;transform-origin:0 0;filter:drop-shadow(0 6px 8px rgba(0,0,0,.3));z-index:10}
+</style></head><body><div id="stage"><div id="bg"></div>
+<div id="name"><div id="pill"></div><div id="fname"></div><div id="ben"></div></div>
+<div id="cam"><div class="persp"><div id="win">
+  <div class="bar"><i></i><i></i><i></i></div>
+  <div id="rail"><b></b><b></b><b></b><b></b></div>
+  <div id="tools"><div class="chipT"><b></b>Text</div><div class="chipT"><b></b>Brand kit</div><div class="chipT" id="rz"><b></b><span id="rzT"></span><span class="nw" id="nw">NEW</span></div></div>
+  <div id="work"></div>
+  <div id="menuwrap"><div id="menu"></div></div>
+</div></div></div>
+<svg id="cur" viewBox="0 0 24 24"><path d="M3 2l7.5 19 2.4-7.6L20.5 11z" fill="#fff" stroke="#1F1C19" stroke-width="1.3" stroke-linejoin="round"/></svg>
+</div>
+<script src="/lib/kit.js"></script>
+<script>
+(async () => {
+  const TL = await loadTL(), W = TL.W, H = TL.H, A = TL.ACCENT, A2 = TL.ACCENT2, FC = TL.FEAT_CUES, [NEW, FNAME, BEN] = TL.COPY.feature;
+  // ---------------- CONFIG (REPLACE from the user's real screenshots) ----------------
+  const CONFIG = { chip: FNAME, menu: TL.COPY.menu, target: 3, sizes: TL.COPY.sizes, aspects: [1, 9 / 16, 16 / 9], image: '/plates/ref1.jpg' };
+  await Promise.all(['italic 900 100px Archivo', '600 40px "Inter Tight"', 'italic 400 60px "Instrument Serif"'].map(f => document.fonts.load(f)));
+  const $ = s => document.querySelector(s), st = $('#stage'); st.style.width = W + 'px'; st.style.height = H + 'px';
+  const fmt = W / H > 1.2 ? 'land' : W / H < 0.85 ? 'port' : 'square', tall = H / W > 1.5, u = Math.min(W, H) / 1080;
+  const SW = W - 2 * (fmt === 'land' ? 104 : fmt === 'port' ? 120 : 72);
+  // ---- name card (exact px per format, auto-fit to the safe width)
+  const NP = { land: { pill: 30, name: 168, ben: 64 }, port: { pill: 30, name: 150, ben: 58 }, square: { pill: 28, name: 140, ben: 54 } }[fmt];
+  const pill = $('#pill'), fname = $('#fname'), ben = $('#ben');
+  pill.textContent = NEW; Object.assign(pill.style, { fontSize: NP.pill + 'px', padding: `${NP.pill * 0.4}px ${NP.pill * 0.9}px`, background: `linear-gradient(100deg,${A2},${A})`, boxShadow: `0 12px 30px ${A}66` });
+  fname.textContent = FNAME; fname.style.fontSize = NP.name + 'px'; fname.style.marginTop = (NP.pill * 0.9) + 'px';
+  ben.innerHTML = BEN.split(' ').map(w => `<span>${w}</span>`).join(''); ben.style.fontSize = NP.ben + 'px'; ben.style.color = A; ben.style.marginTop = (NP.ben * 0.35) + 'px';
+  [fname, ben].forEach(e => { const w = K.measure(e).width; if (w > SW) e.style.fontSize = (parseFloat(e.style.fontSize) * SW / w) + 'px'; });
+  const nm = $('#name'); nm.style.width = W + 'px'; nm.style.top = (H * (fmt === 'port' ? 0.42 : 0.5) - K.measure(nm).height / 2) + 'px';
+  for (let k = 0; k < 8; k++) { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('class', 'spk');
+    s.style.width = s.style.height = (22 * u) + 'px'; s.innerHTML = `<path d="M12 0C13 8 16 11 24 12C16 13 13 16 12 24C11 16 8 13 0 12C8 11 11 8 12 0Z" fill="${k % 2 ? A2 : A}"/>`; st.appendChild(s); }
+  const spks = [...document.querySelectorAll('.spk')];
+  // ---- the window, per format
+  const WS = { land: [1400, 840], port: [940, Math.min(1180, Math.round(H * 0.78))], square: [900, 820] }[fmt];
+  const win = $('#win'); Object.assign(win.style, { width: WS[0] + 'px', height: WS[1] + 'px', left: (W - WS[0]) / 2 + 'px', top: ((fmt === 'port' ? H * 0.46 : H / 2) - WS[1] / 2) + 'px' });
+  $('#rzT').textContent = CONFIG.chip; $('#nw').style.background = A;
+  $('#menu').innerHTML = CONFIG.menu.map((m, i) => `<div id="o${i}">${m}</div>`).join('');
+  const cv = $('#work'), CW = WS[0] - 70, CH = WS[1] - 114;
+  const ph = CH * 0.78, pw = ph * 0.8, post = { x: (CW - pw) / 2, y: (CH - ph) / 2, w: pw, h: ph };
+  const gap = 26, sumA = CONFIG.aspects.reduce((a, b) => a + b, 0), hr = Math.min(CH * 0.56, (CW * 0.9 - 2 * gap) / sumA);
+  let x = (CW - (hr * sumA + 2 * gap)) / 2; let tgt = CONFIG.aspects.map(a => { const r = { x, y: (CH - hr) / 2 - 18, w: hr * a, h: hr }; x += hr * a + gap; return r; });
+  if (fmt === 'port') {   // 9:16: the widest result on top, the other two side by side below (bigger than one row)
+    const wide = CONFIG.aspects.indexOf(Math.max(...CONFIG.aspects)), rest = CONFIG.aspects.map((a, i) => i).filter(i => i !== wide);
+    const w1 = CW * 0.84, h1 = w1 / CONFIG.aspects[wide], sA = rest.reduce((a, i) => a + CONFIG.aspects[i], 0), h2 = Math.min(CH * 0.4, (w1 - gap) / sA);
+    const top = (CH - (h1 + gap + 40 + h2)) / 2 - 20; tgt = []; tgt[wide] = { x: (CW - w1) / 2, y: top, w: w1, h: h1 };
+    let x2 = (CW - (h2 * sA + gap)) / 2; rest.forEach(i => { tgt[i] = { x: x2, y: top + h1 + gap + 40, w: h2 * CONFIG.aspects[i], h: h2 }; x2 += h2 * CONFIG.aspects[i] + gap; });
+  }
+  const cards = CONFIG.aspects.map((a, i) => { const d = document.createElement('div'); d.className = 'card'; d.innerHTML = `<img src="${CONFIG.image}">`; cv.appendChild(d); return d; });
+  const labs = CONFIG.sizes.map((s, i) => { const d = document.createElement('div'); d.className = 'lab'; d.style.fontSize = (fmt === 'port' ? 24 : 18) + 'px';
+    d.innerHTML = `<i style="width:24px;height:24px;font-size:14px;background:${A}">&#10003;</i>${s}`; cv.appendChild(d); return d; });
+  const mw = $('#menuwrap');                                       // the menu opens under the feature chip (measured once at rest)
+  { const r = K.measure('#rz'), wr = K.measure(win); mw.style.left = (r.left - wr.left - 10) + 'px'; mw.style.top = (r.top - wr.top + r.height + 10) + 'px'; }
+  await Promise.all([...document.images].map(i => i.decode().catch(() => {})));
+
+  // ---- camera (same model as saas-product-video ui.html): show layout point (px,py) at (ax,ay), scaled s
+  const ID = { px: W / 2, py: H / 2, s: 1, ax: W / 2, ay: H / 2 }, cam = $('#cam');
+  const setCam = c => { cam.style.transform = `translate(${c.ax - c.s * c.px}px,${c.ay - c.s * c.py}px) scale(${c.s})`; };
+  const focus = (sel, s, ax, ay) => { const c = K.center(sel); return { px: c.x, py: c.y, s, ax: ax * W, ay: ay * H }; };
+  const mixC = (a, b, v) => ({ px: K.lerp(a.px, b.px, v), py: K.lerp(a.py, b.py, v), s: Math.exp(K.lerp(Math.log(a.s), Math.log(b.s), v)), ax: K.lerp(a.ax, b.ax, v), ay: K.lerp(a.ay, b.ay, v) });
+  const path = (t, keys) => { let c = keys[0][1]; for (let i = 1; i < keys.length; i++) { const [ta, a] = keys[i - 1], [tb, b] = keys[i]; if (t >= ta) c = mixC(a, b, K.E.inOut(K.seg(t, ta, tb))); } return c; };
+  const press = (t, tc, d = 0.1) => 1 - d * Math.exp(-Math.pow((t - tc) / 0.07, 2));
+  const CK = FC.click, cur = $('#cur');
+
+  window.render = t => {
+    const d = t * 0.25;
+    $('#bg').style.background = `radial-gradient(60% 70% at ${30 + 18 * Math.sin(d * 2)}% ${40 + 10 * Math.cos(d * 3)}%, ${A2}88, transparent 70%),` +
+      `radial-gradient(55% 60% at ${75 - 15 * Math.sin(d * 2.4)}% ${65 + 12 * Math.sin(d * 1.7)}%, ${A}55, transparent 70%),` +
+      `radial-gradient(50% 50% at ${55 + 20 * Math.cos(d * 1.3)}% ${15 + 8 * Math.sin(d)}%, #E9D9FFcc, transparent 70%), #FFF3EC`;
+    // ---- 1 · name card
+    const nOn = t < 2.0; nm.style.display = nOn ? '' : 'none';
+    if (nOn) {
+      const out = K.E.in(K.seg(t, 1.72, 1.9)), pp = K.E.back(K.seg(t, FC.pop[0], FC.pop[0] + 0.3), 2.2);
+      K.set(pill, { s: t < FC.pop[0] ? 0.001 : Math.max(0.001, pp), o: t < FC.pop[0] ? 0 : 1 });
+      const fn = K.E.out(K.seg(t, 0.3, 0.62), 5); K.set(fname, { s: K.lerp(1.3, 1, fn), o: K.seg(t, 0.3, 0.36), blur: (1 - fn) * 12 });
+      K.shine(fname, t, FC.shine, 0.45);
+      ben.querySelectorAll('span').forEach((w, i) => { const a = 0.9 + i * 0.09, v = K.E.out(K.seg(t, a, a + 0.4)); K.set(w, { o: v, y: (1 - v) * 20, blur: (1 - v) * 12 }); });
+      K.set(nm, { y: -out * 120 * u, o: 1 - out, blur: out * 10, s: 1 + out * 0.1 });
+      const pr = K.measure(pill), pc = { x: pr.left + pr.width / 2, y: pr.top + pr.height / 2 };
+      spks.forEach((s, k) => { const a = k / 8 * Math.PI * 2, v = K.seg(t, FC.sparkle[0], FC.sparkle[0] + 0.5), r = (40 + 130 * K.E.out(v)) * u;
+        K.set(s, { x: pc.x + Math.cos(a) * r * 1.4 - 11 * u, y: pc.y + Math.sin(a) * r * 0.7 - 11 * u, s: Math.sin(Math.PI * v) * (k % 2 ? 0.7 : 1.2), r: 120 * v, o: v > 0 && v < 1 ? 1 : 0 }); });
+    } else spks.forEach(s => s.style.opacity = 0);
+    // ---- 2 · the window springs in (DROP at 2.0), menu, A becomes B
+    const wOn = t >= 2.0; $('#cam').style.display = wOn ? '' : 'none';
+    if (!wOn) { cur.style.display = 'none'; return; }
+    const sp = K.E.spring(K.seg(t, 2.0, 2.9), 0.6, 11), settle = K.E.inOut(K.seg(t, 2.7, 3.2));
+    K.set(win, { rx: K.lerp(26, 5, sp) * (1 - settle), ry: K.lerp(-24, -7, sp) * (1 - settle), y: (1 - sp) * 300 * u, s: K.lerp(0.8, 1, sp), o: K.seg(t, 1.99, 2.03) });
+    K.set('#rz', { s: press(t, CK[0], 0.08) }); $('#rz').style.borderColor = t >= CK[0] ? A : 'rgba(30,24,18,.1)';
+    const mp = K.E.back(K.seg(t, FC.pop[1] - 0.02, FC.pop[1] + 0.22), 1.8), mOn = t >= FC.pop[1] - 0.02 && t < CK[1] + 0.18;
+    K.set('#menu', { s: mOn ? Math.max(0.001, mp) * press(t, CK[1], 0.04) : 0.001, o: mOn ? 1 - K.seg(t, CK[1] + 0.08, CK[1] + 0.18) : 0 });
+    CONFIG.menu.forEach((_, i) => $('#o' + i).style.background = i === CONFIG.target && t > 3.75 ? '#FFF1EA' : 'transparent');
+    // A becomes B: three copies of the 4:5 post morph to their sizes and spread into a row; a check pops on each
+    const ab = t - FC.sparkle[1];
+    cards.forEach((c, i) => { const v = K.E.out(K.seg(ab, i * 0.12, 0.7 + i * 0.12), 4), r = { x: K.lerp(post.x, tgt[i].x, v), y: K.lerp(post.y, tgt[i].y, v), w: K.lerp(post.w, tgt[i].w, v), h: K.lerp(post.h, tgt[i].h, v) };
+      Object.assign(c.style, { left: r.x + 'px', top: r.y + 'px', width: r.w + 'px', height: r.h + 'px', zIndex: 3 - i });
+      c.style.boxShadow = `0 18px 40px rgba(60,30,10,.18),0 0 0 ${t >= FC.pop[2 + i] ? 3 : 0}px ${A}`;
+      const L = labs[i], lv = K.seg(t, FC.pop[2 + i], FC.pop[2 + i] + 0.12); L.style.left = tgt[i].x + 'px'; L.style.top = (tgt[i].y + tgt[i].h + 16) + 'px';
+      K.set(L, { o: lv, s: t >= FC.pop[2 + i] ? 1 + 0.2 * Math.exp(-(t - FC.pop[2 + i]) / 0.08) : 1, origin: '0 50%' }); });
+    // ---- camera: spring-in wide, macro on the feature chip, follow the menu, pull back for A -> B, slow push
+    setCam(ID);
+    const fR = focus('#rz', 1.75, 0.5, 0.42), fM = focus('#menuwrap', 1.55, 0.5, 0.5), fC = focus('#work', 1.0, 0.5, fmt === 'port' ? 0.5 : 0.52);
+    const c = path(t, [[2.0, ID], [2.6, ID], [2.95, fR], [3.3, fR], [3.6, fM], [4.05, fM], [4.6, fC], [6.5, { ...fC, s: 1.07 }]]);
+    setCam(c);
+    // ---- the cursor: MEASURED targets, a squash on each click (beats)
+    const cs = 30 * u * Math.sqrt(c.s); cur.style.width = cur.style.height = cs + 'px';
+    const legs = [[2.45, 2.92, { x: W * 0.85, y: H * 1.05 }, '#rz', CK[0], 3.5], [3.45, 3.92, '#rz', '#o' + CONFIG.target, CK[1], 4.5]];
+    const leg = legs.find(l => t >= l[0] && t < l[5]);
+    if (leg) { const [a, b, from, to, tc] = leg; cur.style.display = ''; K.cursor(cur, from, to, t, a, b, tc); cur.style.opacity = 1 - K.seg(t, leg[5] - 0.2, leg[5]); }
+    else cur.style.display = 'none';
+  };
+  await document.fonts.ready; window.READY = true;
+})();
+</script></body></html>

@@ -1,0 +1,16 @@
+{
+  "tools": [
+    {"name": "get_connection", "description": "Check the Sloosh connection, spending status and the daily allowance left. Call once at the start of a conversation.", "inputSchema": {"type": "object", "properties": {}}},
+    {"name": "get_guide", "description": "Read a Sloosh guide by id: connection, spending, assets, generation, spaces, recovery, release-status.", "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]}},
+    {"name": "list_models", "description": "List generation models for a mode (image_gen, video_gen, video_edit, video_extend) with their limits.", "inputSchema": {"type": "object", "properties": {"mode": {"type": "string"}}, "required": ["mode"]}},
+    {"name": "list_assets", "description": "List assets already in the Sloosh workspace.", "inputSchema": {"type": "object", "properties": {"kind": {"type": "string"}, "query": {"type": "string"}}}},
+    {"name": "import_asset", "description": "Import an image from a public HTTPS URL into Sloosh. Returns the asset kind and id.", "inputSchema": {"type": "object", "properties": {"url": {"type": "string"}, "name": {"type": "string"}}, "required": ["url"]}},
+    {"name": "view_asset", "description": "Look at an image asset.", "inputSchema": {"type": "object", "properties": {"kind": {"type": "string"}, "id": {"type": "string"}}, "required": ["kind", "id"]}},
+    {"name": "get_asset", "description": "Get an asset and its current URL.", "inputSchema": {"type": "object", "properties": {"kind": {"type": "string"}, "id": {"type": "string"}}, "required": ["kind", "id"]}},
+    {"name": "list_spaces", "description": "Search published Spaces.", "inputSchema": {"type": "object", "properties": {"query": {"type": "string"}}}},
+    {"name": "quote_generation", "description": "Quote one generation: one prompt, one model, up to 4 outputs. Free. Returns a quoteId and its credits.", "inputSchema": {"type": "object", "properties": {"mode": {"type": "string"}, "model": {"type": "string"}, "prompt": {"type": "string"}, "aspectRatio": {"type": "string"}, "count": {"type": "integer"}, "referenceAssets": {"type": "array", "items": {"type": "object"}}}, "required": ["mode", "model", "prompt"]}},
+    {"name": "generate", "description": "Start a paid generation for a quote. Needs quoteId, a stable idempotencyKey and confirmed=true after the user approves the quote.", "inputSchema": {"type": "object", "properties": {"quoteId": {"type": "string"}, "idempotencyKey": {"type": "string"}, "confirmed": {"type": "boolean"}}, "required": ["quoteId", "idempotencyKey", "confirmed"]}},
+    {"name": "show_generation", "description": "Show a result card for up to 8 operation ids.", "inputSchema": {"type": "object", "properties": {"operationIds": {"type": "array", "items": {"type": "string"}}}, "required": ["operationIds"]}},
+    {"name": "get_generation", "description": "Get the status and outputs of a generation.", "inputSchema": {"type": "object", "properties": {"operationId": {"type": "string"}}, "required": ["operationId"]}}
+  ]
+}

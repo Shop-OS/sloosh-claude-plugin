@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: not-connected
+description: With no Sloosh tools, the pack tells the user to install and connect the core Sloosh plugin and generates nothing.
+tags: [guard]
+runs: 2

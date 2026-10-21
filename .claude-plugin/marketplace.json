@@ -5,13 +5,18 @@
         "url": "https://sloosh.ai"
     },
     "metadata": {
-        "description": "The Sloosh plugins for Claude: product images, ad variants, product videos, Sloosh Spaces and launch films, plus a Shopify pack for catalog images, launch ads and product page videos."
+        "description": "The Sloosh plugins for Claude: product images, ad variants, product videos, Sloosh Spaces and launch films, plus a Shopify pack for catalog images, launch ads and product page videos, and a motion pack for stylised short films."
     },
     "plugins": [
         {
             "name": "sloosh",
             "source": "./",
             "description": "Create product images, ad variants and short product videos, run published Sloosh Spaces from chat, and direct a product launch film with Remotion in a coding agent. The assistant asks for your approval before any paid work."
+        },
+        {
+            "name": "sloosh-motion",
+            "source": "./packs/sloosh-motion",
+            "description": "Stylised short motion films rendered on your computer: product reveals, beat-synced edits, software walkthroughs, kinetic typography, glitch, dot-matrix and morph films, with Sloosh stills and clips for the missing shots. Needs a coding agent that runs local commands. The assistant asks for your approval before any paid work."
         },
         {
             "name": "sloosh-shopify",

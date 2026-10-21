@@ -1,0 +1,141 @@
+<!doctype html>
+<!-- ui/morph.html (morph-shapeshift, code route): UI SHAPE-SHIFTER -> SEND MORPH -> WORDMARK, a pure window.render(t).
+       python3 lib/render_html.py ui/morph.html --dur 12 --out frames/morph --jobs 1
+     One shape lives through six UI states (each does ONE micro-action in its hold) -> a prompt bar is typed -> the cursor
+     (placed from the MEASURED send button) clicks -> concentric rounded-square rings radiate -> the bar collapses into the
+     send button and grows into a dark glossy tile with an accent border -> the logo's eyes (traced from the real file:
+     ui/logo.json) pop in, glance left/right and blink -> the full wordmark grows out of the tile with its eyes exactly
+     over the tile's eyes, and the lockup settles centred. Times come from tl.json (MORPH); colours from tl.py. -->
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'Inter Tight';src:url('/fonts/inter-tight-latin-wght-normal.woff2') format('woff2');font-weight:100 900;font-display:block}
+html,body{margin:0;background:transparent;overflow:hidden}
+svg{position:absolute;left:0;top:0}
+text{font-family:'Inter Tight';font-weight:600}
+</style></head><body>
+<svg id="sv" xmlns="http://www.w3.org/2000/svg"><defs>
+  <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#000" flood-opacity=".55"/></filter>
+  <pattern id="dots" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="18" cy="18" r="1.3" fill="#fff"/></pattern>
+  <clipPath id="iconClip" clipPathUnits="userSpaceOnUse"><rect id="iconClipR"/></clipPath>
+  <clipPath id="growClip" clipPathUnits="userSpaceOnUse"><rect id="growClipR"/></clipPath>
+</defs>
+<rect id="grid" width="100%" height="100%" fill="url(#dots)" opacity=".06"/>
+<g id="world">
+  <g id="rings"></g>
+  <g id="shapeG"><path id="shape" filter="url(#soft)"/></g>
+  <g id="c1"><text id="btnTxt" text-anchor="middle" y="14" font-size="40" fill="#0B0B0C"></text></g>
+  <g id="c2"><circle r="40" fill="none" stroke="#D9D9D4" stroke-width="9"/><circle id="spin" r="40" fill="none" stroke="#0B0B0C" stroke-width="9" stroke-linecap="round" stroke-dasharray="70 182"/></g>
+  <g id="c3"><circle cx="-250" r="52" class="acc"/><path d="M-264 -24 L-230 0 L-264 24 Z" fill="#fff"/>
+    <text id="trk" x="-170" y="-12" font-size="34" fill="#0B0B0C"></text>
+    <rect x="-170" y="16" width="420" height="10" rx="5" fill="#D9D9D4"/><rect id="prog" x="-170" y="16" height="10" rx="5" class="acc"/></g>
+  <g id="c4"><circle id="tknob" r="50" fill="#0B0B0C"/></g>
+  <g id="c5"></g>
+  <g id="c6"><text id="typed" x="-396" y="14" font-size="40" fill="#0B0B0C"></text>
+    <rect id="send" x="338" y="-46" width="92" height="92" rx="26" class="acc"/><path id="arrow" d="M384 22 L384 -20 M366 -2 L384 -20 L402 -2" stroke="#0B0B0C" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+  <g id="tileIcon" clip-path="url(#iconClip)"></g>
+  <g id="logoG" clip-path="url(#growClip)"></g>
+</g>
+<path id="cursor" d="M0 0 L0 46 L12 35 L21 56 L30 52 L21 32 L37 32 Z" fill="#fff" stroke="#0B0B0C" stroke-width="3"/>
+</svg>
+<script src="/lib/kit.js"></script><script src="/vendor/flubber.min.js"></script><script src="/lib/morphkit.js"></script>
+<script>
+(async () => {
+  const TL = await loadTL(), W = TL.W, H = TL.H, M = TL.MORPH, S = M.states, ar = W / H, land = ar > 1.2, tall = ar < 0.7;
+  // scale from the short side (x1.3 on landscape), capped so the 900-unit prompt bar keeps the 11.5% side safe zone free (ui/type.html mirrors this)
+  const u = Math.min(Math.min(W, H) / 1080 * (land ? 1.3 : 1.0), W * 0.77 / 900), CX = W / 2, CY = H * (tall ? 0.42 : 0.44), ACC = TL.ACCENT, SURF = TL.SURFACE, DARK = '#141414';
+  await document.fonts.load('600 40px "Inter Tight"');
+  const sv = document.getElementById('sv'); sv.setAttribute('width', W); sv.setAttribute('height', H); sv.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const $ = id => document.getElementById(id), world = $('world');
+  world.setAttribute('transform', `translate(${CX} ${CY}) scale(${u})`);
+  document.querySelectorAll('.acc').forEach(e => e.setAttribute('fill', ACC));
+  $('btnTxt').textContent = M.button; $('trk').textContent = M.track;
+  const NS = 'http://www.w3.org/2000/svg';
+  [[-222, 160], [-132, 200], [-42, 140], [48, 230], [138, 260]].forEach(([x, h], i) => { const r = document.createElementNS(NS, 'rect');
+    Object.entries({ x, y: 150 - h, width: 64, height: h, rx: 10, fill: i === 4 ? ACC : '#C9C9C4', class: 'bar' }).forEach(([k, v]) => r.setAttribute(k, v)); $('c5').appendChild(r); });
+  for (let k = 0; k < 3; k++) { const r = document.createElementNS(NS, 'rect'); r.setAttribute('fill', 'none'); r.setAttribute('stroke', ACC); $('rings').appendChild(r); }
+
+  // ---- the shape's states (MK.box: parameter morph, every in-between is a true rounded rect)
+  const bx = MK.box, SEND = bx(384, 0, 92, 92, 26), TILE = bx(0, 0, 240, 240, 56);
+  const KEYS = [[0, bx(0, 0, 32, 32, 16)], [S[0], bx(0, 0, 420, 124, 62)], [S[1], bx(0, 0, 144, 144, 72)], [S[2], bx(0, 0, 640, 190, 44)],
+    [S[3], bx(0, 0, 236, 132, 66)], [S[4], bx(0, 0, 560, 400, 40)], [S[5], bx(0, 0, 900, 132, 66)],
+    [M.collapse, SEND, { dur: 0.32, ease: MK.E.p3InOut }], [M.tile, TILE, { dur: 0.5, squash: 0.08 }]];
+  const CONTENT = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'];
+
+  // ---- the logo, traced from the real file: tile icon (clipped to the icon box) + full wordmark (revealed by growClip)
+  const L = await MK.loadLogo('/ui/logo.json'), [ix, iy, iw, ih] = L.icon, [lx, ly, lw, lh] = L.bbox;
+  const k = 150 / Math.max(iw, ih), icx = ix + iw / 2, icy = iy + ih / 2;          // icon fills 150 of the 240 tile
+  const place = `scale(${k}) translate(${-icx} ${-icy})`;
+  $('tileIcon').innerHTML = `<g transform="${place}">${MK.logoSVG(L, 'ti')}</g>`; $('logoG').innerHTML = `<g transform="${place}">${MK.logoSVG(L, 'lg')}</g>`;
+  const lum = c => { const n = parseInt(c.slice(1), 16); return 0.2126 * (n >> 16) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255); };
+  const order = L.layers.map((l, i) => i).sort((a, b) => lum(L.layers[a].color) - lum(L.layers[b].color)), darkL = order[0], lightL = order[order.length - 1];
+  const inIcon = b => b && b[0] + b[2] / 2 > ix && b[0] + b[2] / 2 < ix + iw && b[1] + b[3] / 2 > iy && b[1] + b[3] / 2 < iy + ih;
+  const eyes = [];                                                               // pupils: small dark parts; whites: light parts
+  for (const g of ['tileIcon', 'logoG']) document.querySelectorAll(`#${g} path`).forEach(p => {
+    const kk = +p.dataset.k, part = L.layers[kk].parts[+p.dataset.j], b = part.bbox;
+    if (!inIcon(b)) return; const small = b[2] * b[3] < 0.15 * iw * ih;
+    if ((kk === darkL && small) || kk === lightL) eyes.push({ p, pupil: kk === darkL, cx: b[0] + b[2] / 2, cy: b[1] + b[3] / 2 });
+    if (kk === lightL) p.setAttribute('d', part.ring);                          // whites solid (no pupil hole) ...
+    if (kk === darkL && small) { p.setAttribute('fill', L.layers[kk].color); p.parentNode.parentNode.appendChild(p); } });  // ... pupils on top, free to move
+  const pad = 6; ['iconClipR'].forEach(id => Object.entries({ x: ix - pad, y: iy - pad, width: iw + 2 * pad, height: ih + 2 * pad }).forEach(([a, v]) => $(id).setAttribute(a, v)));
+  $('iconClipR').setAttribute('transform', place); $('growClipR').setAttribute('transform', place);
+  // final lockup: the whole logo centred on the stage (the tile icon sits off-centre inside it)
+  const endDX = -(lx + lw / 2 - icx) * k, endDY = -(ly + lh / 2 - icy) * k;
+  const cursorFrom = { x: W * 0.84, y: H * 0.94 };
+
+  window.render = t => {
+    // SHAPE: the chain, anticipation squash before the first stretch, overshoot when the tile lands
+    const c = MK.chain(t, KEYS), an = MK.anticipate(t, S[0], { amt: 0.18 }), born = MK.E.expoOut(K.seg(t, 0.1, 0.45));
+    const ov = MK.overshoot(t, M.tile + 0.5, 0.05), press = MK.press(t, S[0] + 0.7, 0.05) * MK.press(t, M.click, 0.12);
+    $('shape').setAttribute('d', c.d);
+    $('shapeG').setAttribute('transform', `scale(${an.sx * born * ov * press} ${an.sy * born * ov * press})`);
+    // colour: surface -> accent on the toggle, back on the chart; -> the send accent on collapse; -> dark tile (lags 20-90%)
+    let fill = SURF;
+    if (t >= S[3] + 0.45 && t < S[4] + 0.5) fill = t < S[4] ? MK.color(SURF, ACC, K.seg(t, S[3] + 0.45, S[3] + 0.75)) : MK.colorLag(ACC, SURF, t, S[4], 0.5);
+    if (t >= M.collapse) fill = t < M.tile ? MK.colorLag(SURF, ACC, t, M.collapse, 0.32) : MK.colorLag(ACC, DARK, t, M.tile, 0.5);
+    const shp = $('shape'); shp.style.fill = fill;
+    const border = K.seg(t, M.tile + 0.1, M.tile + 0.45) * (1 - K.seg(t, M.grow, M.grow + 0.35));
+    shp.setAttribute('stroke', ACC); shp.setAttribute('stroke-width', 6 * border);
+    shp.style.fillOpacity = 1 - K.seg(t, M.grow + 0.05, M.grow + 0.4);
+    // CONTENT handoff: old out in the first 30% of the morph, new in over the last 40%
+    CONTENT.forEach((id, i) => { const a = S[i], b = i + 1 < S.length ? S[i + 1] : M.collapse;
+      const o = (t < a ? 0 : MK.handoff(t, a, 0.5).in) * (t < b ? 1 : MK.handoff(t, b, i + 1 < S.length ? 0.5 : 0.32).out); $(id).setAttribute('opacity', o); });
+    // MICRO-ACTIONS: one per state, mid-hold
+    $('c1').setAttribute('transform', `scale(${MK.press(t, S[0] + 0.7, 0.05)})`);
+    $('spin').setAttribute('transform', `rotate(${540 * MK.E.p3InOut(K.seg(t, S[1] + 0.1, S[1] + 1.0))})`);
+    $('prog').setAttribute('width', 24 + 226 * MK.E.expoOut(K.seg(t, S[2] + 0.4, S[2] + 1.3)));
+    $('tknob').setAttribute('cx', -52 + 104 * MK.E.p3InOut(K.seg(t, S[3] + 0.45, S[3] + 0.77))); $('tknob').setAttribute('fill', t > S[3] + 0.6 ? '#fff' : '#0B0B0C');
+    document.querySelectorAll('.bar').forEach((r, i) => { const g = MK.E.expoOut(K.seg(t, S[4] + 0.35 + i * 0.06, S[4] + 0.85 + i * 0.06));
+      r.setAttribute('transform', `translate(0 ${150 * (1 - g)}) scale(1 ${Math.max(g, 0.001)})`); });
+    // TYPING: newest letters in the accent, a caret from film time
+    const [t0, cps] = M.type, n = Math.max(0, Math.min(M.prompt.length, Math.floor((t - t0) * cps)));
+    $('typed').innerHTML = [...M.prompt.slice(0, n)].map((ch, i) => `<tspan fill="${n - 1 - i < 4 ? ACC : '#0B0B0C'}">${ch === ' ' ? '&#160;' : ch}</tspan>`).join('') +
+      ((Math.floor(t * 2.4) % 2 === 0 || n < M.prompt.length) && t > t0 ? '<tspan fill="#0B0B0C">|</tspan>' : '');
+    $('arrow').setAttribute('opacity', 1 - K.seg(t, M.collapse, M.collapse + 0.15));
+    // CURSOR from the MEASURED send button (after the world transform), click squash, gone after the click
+    const r = $('send').getBoundingClientRect(), tgt = { x: r.left + r.width * 0.55, y: r.top + r.height * 0.6 };
+    const cu = MK.E.p3InOut(K.seg(t, M.cursor[0], M.cursor[1])), bend = Math.sin(Math.PI * cu) * 60 * u;
+    const cx = MK.lerp(cursorFrom.x, tgt.x, cu) + bend * 0.3, cy = MK.lerp(cursorFrom.y, tgt.y, cu) - bend;
+    $('cursor').setAttribute('transform', `translate(${cx} ${cy}) scale(${u * MK.press(t, M.click, 0.18)})`);
+    $('cursor').setAttribute('opacity', K.seg(t, M.cursor[0] - 0.1, M.cursor[0] + 0.05) * (1 - K.seg(t, M.click + 0.15, M.click + 0.35)));
+    // RINGS: concentric rounded squares from the click point
+    MK.rings(t, M.click, { n: 3, stagger: 0.08, dur: 0.75, scale: 3.4 }).forEach((g, i) => { const e = $('rings').children[i], s = 92 * g.s;
+      Object.entries({ x: 384 - s / 2, y: -s / 2, width: s, height: s, rx: 26 * g.s, 'stroke-width': g.w, opacity: g.o }).forEach(([a, v]) => e.setAttribute(a, v)); });
+    // ICON in the tile: pops in on the DROP (back ease), pupils glance L then R, then one blink
+    const pop = MK.E.back(K.seg(t, M.icon, M.icon + 0.35), 2.2), showIcon = t >= M.icon && t < M.grow + 0.02;
+    const glance = (K.seg(t, M.glance[0], M.glance[0] + 0.1) - K.seg(t, M.glance[1], M.glance[1] + 0.12) * 2 + K.seg(t, M.glance[1] + 0.25, M.glance[1] + 0.35)) * -0.08 * iw;
+    const blink = 1 - 0.92 * Math.exp(-Math.pow((t - M.blink) / 0.045, 2));
+    eyes.forEach(e => e.p.setAttribute('transform', `translate(${e.pupil ? glance : 0} 0) translate(${e.cx} ${e.cy}) scale(1 ${blink}) translate(${-e.cx} ${-e.cy})`));
+    $('tileIcon').setAttribute('opacity', showIcon ? 1 : 0); $('tileIcon').setAttribute('transform', `scale(${Math.max(pop, 0.001)})`);
+    // WORDMARK grows out of the tile: the reveal box expands from the icon box to the whole logo, while the lockup slides centred
+    const g = MK.E.expoInOut(K.seg(t, M.grow, M.settle)), slide = MK.E.p3InOut(K.seg(t, M.grow + 0.15, M.settle + 0.15));
+    const gx0 = MK.lerp(ix - pad, lx - 4, g), gx1 = MK.lerp(ix + iw + pad, lx + lw + 4, g), gy0 = MK.lerp(iy - pad, ly - 4, g), gy1 = MK.lerp(iy + ih + pad, ly + lh + 4, g);
+    Object.entries({ x: gx0, y: gy0, width: gx1 - gx0, height: gy1 - gy0 }).forEach(([a, v]) => $('growClipR').setAttribute(a, v));
+    $('logoG').setAttribute('opacity', t >= M.grow ? 1 : 0);
+    const dx = endDX * slide, dy = endDY * slide;
+    $('logoG').setAttribute('transform', `translate(${dx} ${dy}) scale(${MK.overshoot(t, M.settle, 0.03)})`);
+    $('shapeG').setAttribute('opacity', 1 - K.seg(t, M.grow + 0.2, M.grow + 0.45));
+    $('grid').setAttribute('opacity', 0.06 * (1 - 0.5 * K.seg(t, M.grow, M.settle)));
+  };
+  window.READY = true;
+})();
+</script></body></html>
