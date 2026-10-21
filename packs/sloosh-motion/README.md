@@ -19,7 +19,7 @@ Claude asks you before it installs anything, and it suggests a virtual environme
 Run this in Claude Code:
 
 ```
-/plugin marketplace add Shop-OS/sloosh-claude-plugin
+/plugin marketplace add Shop-OS/sloosh-plugin
 /plugin install sloosh@sloosh
 /plugin install sloosh-motion@sloosh
 ```
@@ -29,7 +29,7 @@ Then run `/mcp`, select sloosh and sign in to Sloosh to authorize the workspace 
 ## Install in Codex
 
 ```
-codex plugin marketplace add Shop-OS/sloosh-claude-plugin
+codex plugin marketplace add Shop-OS/sloosh-plugin
 codex plugin add sloosh@sloosh
 codex plugin add sloosh-motion@sloosh
 codex mcp login sloosh

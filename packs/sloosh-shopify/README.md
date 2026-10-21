@@ -18,7 +18,7 @@ Without a Shopify connector, the pack can read the public product pages of your 
 Run this in Claude Code:
 
 ```
-/plugin marketplace add Shop-OS/sloosh-claude-plugin
+/plugin marketplace add Shop-OS/sloosh-plugin
 /plugin install sloosh@sloosh
 /plugin install sloosh-shopify@sloosh
 ```
@@ -27,7 +27,7 @@ Then run `/mcp`, select sloosh and sign in to Sloosh to authorize the workspace 
 
 ## Install in the Claude app
 
-1. In Claude, open Customize, then Plugins. Add the marketplace Shop-OS/sloosh-claude-plugin and install Sloosh for Shopify stores. You can also select Add and Upload plugin, and choose a ZIP of the packs/sloosh-shopify folder.
+1. In Claude, open Customize, then Plugins. Add the marketplace Shop-OS/sloosh-plugin and install Sloosh for Shopify stores. You can also select Add and Upload plugin, and choose a ZIP of the packs/sloosh-shopify folder.
 2. Install the core Sloosh plugin too, if it is not installed yet.
 3. Open the plugin's Connectors tab. Select Add if Sloosh is not added yet, then select Connect.
 4. Sign in to Sloosh and authorize the workspace you want to use.
@@ -37,7 +37,7 @@ On a Team or Enterprise plan, an Owner must add the Sloosh connector for the org
 ## Install in Codex
 
 ```
-codex plugin marketplace add Shop-OS/sloosh-claude-plugin
+codex plugin marketplace add Shop-OS/sloosh-plugin
 codex plugin add sloosh@sloosh
 codex plugin add sloosh-shopify@sloosh
 codex mcp login sloosh

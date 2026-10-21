@@ -1,4 +1,4 @@
-# Sloosh for Claude
+# Sloosh plugins
 
 ![Sloosh](assets/sloosh.png)
 
@@ -16,13 +16,13 @@ Sloosh uses the credits and the daily spending allowance of the workspace you co
 Run this in Claude Code:
 
 ```
-/plugin install sloosh --marketplace Shop-OS/sloosh-claude-plugin
+/plugin install sloosh --marketplace Shop-OS/sloosh-plugin
 ```
 
 On an older Claude Code, add the marketplace first:
 
 ```
-/plugin marketplace add Shop-OS/sloosh-claude-plugin
+/plugin marketplace add Shop-OS/sloosh-plugin
 /plugin install sloosh@sloosh
 ```
 
@@ -59,13 +59,13 @@ Add the Sloosh server with this URL: https://mcp.sloosh.ai/mcp. Then sign in to 
 List the skills in this repository:
 
 ```
-npx skills@1.7.2 add Shop-OS/sloosh-claude-plugin --list
+npx skills@1.7.2 add Shop-OS/sloosh-plugin --list
 ```
 
 Install the skills you want for the agents you name. With `-g`, the CLI puts one copy in `~/.agents/skills`, which Codex, Cursor and Gemini CLI all read:
 
 ```
-npx skills@1.7.2 add Shop-OS/sloosh-claude-plugin --skill product-imagery product-video -a codex cursor gemini-cli -g -y
+npx skills@1.7.2 add Shop-OS/sloosh-plugin --skill product-imagery product-video -a codex cursor gemini-cli -g -y
 ```
 
 Always name the agents with `-a`. Without it, the CLI installs the skills into every agent it supports, Claude Code included. The skills CLI is a third-party tool. It sends this repository's name and the skill names to skills.sh. Set `DISABLE_TELEMETRY=1` to stop this.
@@ -82,7 +82,7 @@ Some skills hand work to other skills. Install them together:
 Codex can install the whole plugin from this repository, with the six skills and the Sloosh server:
 
 ```
-codex plugin marketplace add Shop-OS/sloosh-claude-plugin
+codex plugin marketplace add Shop-OS/sloosh-plugin
 codex plugin add sloosh@sloosh
 codex mcp login sloosh
 ```
