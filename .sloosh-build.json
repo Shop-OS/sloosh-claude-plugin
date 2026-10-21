@@ -2,7 +2,7 @@
     "generatedFrom": "Shop-OS/shopos-backend-ts apps/spacelab-mcp/plugins",
     "files": {
         ".claude-plugin/marketplace.json": "292f3ac18fd2e114bb3c596955aefb6564248835189550042a3e863b4a264e2a",
-        ".claude-plugin/plugin.json": "0ba1fe63d533152ca57a18efb40130cefa8b2fa2fd128b7499dbf29d61e8c4d7",
+        ".claude-plugin/plugin.json": "a6514b3e15a186388b085e345e33d8bedc369d2b5e3b9c5c9f62554a849c9a40",
         ".github/workflows/check-generated.yml": "69fe8df03c0da597286f3b7f51be9afc9d5ba27548b225904e5e072cee0c5e5e",
         ".gitignore": "61e0b673fc76d2a9b58b229a414cfe8ec216aa5e617003870a4f867c686a54a0",
         ".mcp.json": "b221ca3a6962dcd6a3dcd08b9073f78d6f04507a2fbadfaaefad0dedbabd761f",
